@@ -6,8 +6,8 @@ import { useContainer } from "class-validator";
 import * as cookieParser from "cookie-parser";
 import { MongooseModule } from "@nestjs/mongoose";
 import * as request from "supertest";
-import { BlogClass, BlogsSchema } from "../schemas/blogs.schema";
-import { AppModule } from "../app.module";
+import { BlogClass, BlogsSchema } from "../src/schemas/blogs.schema";
+import { AppModule } from "../src/app.module";
 import {
     EmailRecoveryCodeClass,
     EmailRecoveryCodeSchema,
@@ -19,10 +19,10 @@ import {
     UserDevicesDataClass,
     UserDevicesDataSchema,
     UsersAccountSchema,
-} from "../schemas/users.schema";
-import { NewestLikesClass, NewestLikesSchema, PostClass, PostsSchema } from "../schemas/posts.schema";
-import { CommentClass, CommentsSchema } from "../schemas/comments.schema";
-import { HttpExceptionFilter } from "../exception.filter";
+} from "../src/schemas/users.schema";
+import { NewestLikesClass, NewestLikesSchema, PostClass, PostsSchema } from "../src/schemas/posts.schema";
+import { CommentClass, CommentsSchema } from "../src/schemas/comments.schema";
+import { HttpExceptionFilter } from "../src/exception.filter";
 
 export let app: INestApplication;
 let mongoServer: MongoMemoryServer;
