@@ -12,7 +12,7 @@ export class UsersRepository {
 
     async userConfirmedEmail(id: number): Promise<boolean> {
         const result = await this.dataSource.query(
-            `UPDATE users SET "emailConfirmed" = true,WHERE id = $1 RETURNING id`,
+            `UPDATE users SET "emailConfirmed" = true WHERE id = $1 RETURNING id`,
             [id],
         );
         return result[1] > 0;
@@ -21,7 +21,7 @@ export class UsersRepository {
     async updateConfirmationCode(id: number): Promise<boolean> {
         const newConfirmationCode = uuidv4();
         const result = await this.dataSource.query(
-            `UPDATE users SET "emailConfirmationCode" = $1,WHERE id = $2 RETURNING id`,
+            `UPDATE users SET "emailConfirmationCode" = $1 WHERE id = $2 RETURNING id`,
             [newConfirmationCode, id],
         );
         return result[1] > 0;
@@ -45,7 +45,7 @@ export class UsersRepository {
     }
 
     async updatePasswordHash(id: number, passwordHash: string): Promise<boolean> {
-        const result = await this.dataSource.query(`UPDATE users SET "passwordHash" = $1,WHERE id = $2 RETURNING id`, [
+        const result = await this.dataSource.query(`UPDATE users SET "passwordHash" = $1 WHERE id = $2 RETURNING id`, [
             passwordHash,
             id,
         ]);
@@ -98,7 +98,7 @@ export class UsersRepository {
     }
 
     async terminateSpecificDevice(id: number, deviceId: string): Promise<boolean> {
-        const result = await this.dataSource.query(`DELETE FROM devices,WHERE "deviceId" = $1 RETURNING id`, [
+        const result = await this.dataSource.query(`DELETE FROM devices WHERE "deviceId" = $1 RETURNING id`, [
             deviceId,
         ]);
         return result[1] > 0;

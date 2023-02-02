@@ -55,11 +55,11 @@ export class UsersQueryRepository {
 
         const query = `SELECT id,login,email,"createdAt","isBanned","banDate","banReason" FROM users  
         ${whereClause}  ${
-            banStatus === "banned" ? "AND isBanned = true" : banStatus === "notBanned" ? "AND isBanned = false" : ""
+            banStatus === "banned" ? "AND 'isBanned' = true" : banStatus === "notBanned" ? "AND 'isBanned' = false" : ""
         } `;
         const queryForCount = `SELECT COUNT(*) FROM users          
          ${whereClauseForCount}  ${
-            banStatus === "banned" ? "AND isBanned = true" : banStatus === "notBanned" ? "AND isBanned = false" : ""
+            banStatus === "banned" ? "AND 'isBanned' = true" : banStatus === "notBanned" ? "AND 'isBanned' = false" : ""
         }`;
         const cursor = await this.dataSource.query(query, queryParams);
         const totalCount = await this.dataSource.query(queryForCount, queryParamsForCount);
