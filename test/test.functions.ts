@@ -6,6 +6,8 @@ import * as request from "supertest";
 import { AppModule } from "../src/app.module";
 import { HttpExceptionFilter } from "../src/exception.filter";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { config } from "../src/config/config";
 
 export let app: INestApplication;
 
@@ -31,16 +33,21 @@ export async function setupTestApp() {
     const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [
             AppModule,
-            TypeOrmModule.forRoot({
-                type: "postgres",
-                host: "localhost",
-                port: 5432,
-                username: "nodejs",
-                password: "nodejs",
-                database: "Bloggers",
-                autoLoadEntities: false,
-                synchronize: false,
+            TypeOrmModule.forRootAsync({
+                imports: [ConfigModule],
+                useFactory: (configService: ConfigService) => ({
+                    type: "postgres",
+                    host: configService.get("host"),
+                    port: 5432,
+                    username: "postgres",
+                    password: configService.get("dbPassword"),
+                    database: "bloggers",
+                    autoLoadEntities: false,
+                    synchronize: false,
+                }),
+                inject: [ConfigService],
             }),
+            ConfigModule.forRoot({ isGlobal: true, load: [config] }),
         ],
     }).compile();
 

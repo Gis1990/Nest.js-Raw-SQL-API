@@ -7,4 +7,6 @@ export const config = () => ({
     mailPass: process.env.MAIL_PASS,
     ttl: process.env.TTL || 10,
     limit: process.env.LIMIT || 5,
+    host: process.env.HOST || "localhost",
+    dbPassword: process.env.DBPASSWORD || "postgres",
 });
