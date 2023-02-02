@@ -1,7 +1,6 @@
-import { IQueryHandler, QueryBus, QueryHandler } from "@nestjs/cqrs";
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { CommentsQueryRepository } from "../../query-repositories/comments.query.repository";
-import { CommentClass } from "../../schemas/comments.schema";
-import { GetAllBannedUsersBySuperAdminCommand } from "../users/get-all-banned-users-by-super-admin-query";
+import { CommentsClass } from "../../schemas/comments.schema";
 
 export class GetCommentForIdValidationCommand {
     constructor(public readonly id: string) {}
@@ -9,12 +8,12 @@ export class GetCommentForIdValidationCommand {
 
 @QueryHandler(GetCommentForIdValidationCommand)
 export class GetCommentForIdValidationQuery implements IQueryHandler<GetCommentForIdValidationCommand> {
-    constructor(private commentsQueryRepository: CommentsQueryRepository, private queryBus: QueryBus) {}
+    constructor(private commentsQueryRepository: CommentsQueryRepository) {}
 
-    async execute(query: GetCommentForIdValidationCommand): Promise<CommentClass | null> {
-        const bannedUsersIdsBySuperAdmin = await this.queryBus.execute(new GetAllBannedUsersBySuperAdminCommand());
-        const comment = await this.commentsQueryRepository.getCommentById(query.id);
-        if (!comment || bannedUsersIdsBySuperAdmin.includes(comment.commentatorInfo.userId)) {
+    async execute(query: GetCommentForIdValidationCommand): Promise<CommentsClass | null> {
+        const userId = undefined;
+        const comment = await this.commentsQueryRepository.getCommentById(Number(query.id), userId);
+        if (!comment) {
             return null;
         } else {
             return comment;

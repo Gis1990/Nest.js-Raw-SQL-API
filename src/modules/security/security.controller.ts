@@ -1,10 +1,9 @@
 import { Controller, Response, Get, Delete, Param, UseGuards, HttpCode, Res, HttpException } from "@nestjs/common";
 import { JwtRefreshTokenAuthGuard } from "../../guards/jwtRefreshToken-auth.guard";
 import { CurrentUser } from "../../decorators/auth/auth.custom.decorators";
-import { CurrentUserWithDevicesDataModel } from "../../dtos/auth.dto";
+import { CurrentUserWithDevicesDataModel, UserDevicesDataClass } from "../../dtos/auth.dto";
 import { SkipThrottle } from "@nestjs/throttler";
 import { deviceIdValidationModel } from "../../dtos/security.dto";
-import { UserDevicesDataClass } from "../../schemas/users.schema";
 import { CommandBus } from "@nestjs/cqrs";
 import { ReturnAllDevicesCommand } from "../../commands/security/return-all-devices-use-case";
 import { TerminateAllDevicesCommand } from "../../commands/security/terminate-all-devices-use-case";

@@ -4,31 +4,44 @@ import {
     CommentViewModelForBloggerPaginationClass,
     CommentViewModelPaginationClass,
 } from "../entities/comments.entity";
-import { CommentClass } from "../schemas/comments.schema";
 import { CommentClassPaginationDto } from "../dtos/comments.dto";
+import { CommentsClass } from "../schemas/comments.schema";
 
 export class CommentsFactory {
-    static async createCommentViewModelClass(comment: CommentClass): Promise<CommentViewModelClass> {
+    static async createCommentViewModelClass(comment: CommentsClass): Promise<CommentViewModelClass> {
         return new CommentViewModelClass(
-            comment.id,
+            comment.id.toString(),
             comment.content,
-            comment.commentatorInfo.userId,
-            comment.commentatorInfo.userLogin,
+            {
+                userId: comment.commentOwnerUserId.toString(),
+                userLogin: comment.commentOwnerUserLogin,
+            },
             comment.createdAt,
-            comment.likesInfo,
+            {
+                likesCount: Number(comment.likesCount),
+                dislikesCount: Number(comment.dislikesCount),
+                myStatus: comment.myStatus,
+            },
         );
     }
 
     static async createCommentViewModelForBloggerClass(
-        comment: CommentClass,
+        comment: CommentsClass,
     ): Promise<CommentViewModelForBloggerClass> {
         return new CommentViewModelForBloggerClass(
-            comment.id,
+            comment.id.toString(),
             comment.content,
             comment.createdAt,
-            comment.likesInfo,
-            comment.commentatorInfo,
-            comment.postInfo,
+            {
+                userId: comment.commentOwnerUserId.toString(),
+                userLogin: comment.commentOwnerUserLogin,
+            },
+            {
+                id: comment.postId.toString(),
+                title: comment.title,
+                blogId: comment.blogId.toString(),
+                blogName: comment.blogName,
+            },
         );
     }
 

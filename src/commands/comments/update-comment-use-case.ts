@@ -21,6 +21,6 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
             return false;
         }
         if (command.userId !== comment.userId) throw new HttpException("Incorrect id", 403);
-        return this.commentsRepository.updateCommentById(command.id, command.content);
+        return this.commentsRepository.updateCommentById(Number(command.id), command.content);
     }
 }

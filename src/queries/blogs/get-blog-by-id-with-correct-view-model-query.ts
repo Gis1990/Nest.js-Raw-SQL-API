@@ -3,7 +3,7 @@ import { BlogsQueryRepository } from "../../query-repositories/blogs.query.repos
 import { BlogViewModelClass } from "../../entities/blogs.entity";
 
 export class GetBlogByIdWithCorrectViewModelCommand {
-    constructor(public id: string) {}
+    constructor(public readonly id: string) {}
 }
 
 @QueryHandler(GetBlogByIdWithCorrectViewModelCommand)
@@ -11,6 +11,6 @@ export class GetBlogByIdWithCorrectViewModelQuery implements IQueryHandler<GetBl
     constructor(private blogsQueryRepository: BlogsQueryRepository) {}
 
     async execute(query: GetBlogByIdWithCorrectViewModelCommand): Promise<BlogViewModelClass | null> {
-        return await this.blogsQueryRepository.getBlogByIdWithCorrectViewModel(query.id);
+        return await this.blogsQueryRepository.getBlogByIdWithCorrectViewModel(Number(query.id));
     }
 }

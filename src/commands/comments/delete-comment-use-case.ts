@@ -17,6 +17,6 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
             return false;
         }
         if (command.userId !== comment.userId) throw new HttpException("Incorrect id", 403);
-        return this.commentsRepository.deleteCommentById(command.id);
+        return this.commentsRepository.deleteCommentById(Number(command.id));
     }
 }

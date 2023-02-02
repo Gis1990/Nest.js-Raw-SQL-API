@@ -3,7 +3,12 @@ import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
 import { GetCommentByIdForLikeOperationCommand } from "../../queries/comments/get-comment-by-id-for-like-operation-query";
 
 export class LikeOperationForCommentCommand {
-    constructor(public readonly id: string, public readonly userId: string, public readonly likeStatus: string) {}
+    constructor(
+        public readonly id: string,
+        public readonly userId: string,
+        public readonly login: string,
+        public readonly likeStatus: string,
+    ) {}
 }
 
 @CommandHandler(LikeOperationForCommentCommand)
@@ -11,90 +16,71 @@ export class LikeOperationForCommentUseCase implements ICommandHandler<LikeOpera
     constructor(private commentsRepository: CommentsRepository, private queryBus: QueryBus) {}
 
     async execute(command: LikeOperationForCommentCommand): Promise<boolean> {
-        // Find the comment with the given id
         const comment = await this.queryBus.execute(new GetCommentByIdForLikeOperationCommand(command.id));
         if (!comment) {
-            // Return false if the comment is not found
             return false;
         }
-
-        // Check if the user is liking, disliking, or removing their like/dislike
-        const isLike = command.likeStatus === "Like";
-        const isDislike = command.likeStatus === "Dislike";
-        const isNone = command.likeStatus === "None";
-
-        // Check if the user has already liked or disliked the comment
-        const isLiked = comment.usersLikesInfo.usersWhoPutLike.includes(command.userId);
-        const isDisliked = comment.usersLikesInfo.usersWhoPutDislike.includes(command.userId);
-        // Declare an update object that will be used to update the comment
-
-        let update: any = {};
-
-        // Update the like/dislike count and user lists based on the likeStatus
-        if (isLike && !isLiked && !isDisliked) {
-            // Increment the like count and add the user to the list of users who liked the comment
-            update = {
-                "likesInfo.likesCount": comment.likesInfo.likesCount + 1,
-                "likesInfo.myStatus": command.likeStatus,
-                $push: {
-                    "usersLikesInfo.usersWhoPutLike": command.userId,
-                },
-            };
-        } else if (isDislike && !isDisliked && !isLiked) {
-            // Increment the dislike count and add the user to the list of users who disliked the comment
-            update = {
-                "likesInfo.dislikesCount": comment.likesInfo.dislikesCount + 1,
-                "likesInfo.myStatus": command.likeStatus,
-                $push: {
-                    "usersLikesInfo.usersWhoPutDislike": command.userId,
-                },
-            };
-        } else if (isLiked && isDislike) {
-            // Decrement the like count, increment the dislike count, and update the lists of users who liked/disliked the comment
-            update = {
-                "likesInfo.likesCount": comment.likesInfo.likesCount - 1,
-                "likesInfo.dislikesCount": comment.likesInfo.dislikesCount + 1,
-                "likesInfo.myStatus": command.likeStatus,
-                $pull: {
-                    "usersLikesInfo.usersWhoPutLike": command.userId,
-                },
-                $push: {
-                    "usersLikesInfo.usersWhoPutDislike": command.userId,
-                },
-            };
-        } else if (isDisliked && isLike) {
-            // Decrement the dislike count, increment the like count, and update the lists of users who liked/disliked the comment
-            update = {
-                "likesInfo.likesCount": comment.likesInfo.likesCount + 1,
-                "likesInfo.dislikesCount": comment.likesInfo.dislikesCount - 1,
-                "likesInfo.myStatus": command.likeStatus,
-                $pull: {
-                    "usersLikesInfo.usersWhoPutDislike": command.userId,
-                },
-                $push: {
-                    "usersLikesInfo.usersWhoPutLike": command.userId,
-                },
-            };
-        } else if (isLiked && isNone) {
-            // Decrement the like count, and update the lists of users who liked the comment
-            update = {
-                "likesInfo.likesCount": comment.likesInfo.likesCount - 1,
-                "likesInfo.myStatus": command.likeStatus,
-                $pull: {
-                    "usersLikesInfo.usersWhoPutLike": command.userId,
-                },
-            };
-        } else if (isDisliked && isNone) {
-            // Decrement the dislike count, and update the lists of users who disliked the comment
-            update = {
-                "likesInfo.dislikesCount": comment.likesInfo.dislikesCount - 1,
-                "likesInfo.myStatus": command.likeStatus,
-                $pull: {
-                    "usersLikesInfo.usersWhoPutDislike": command.userId,
-                },
-            };
+        const isLiked = comment.likesArray.map((user) => user.userId).includes(Number(command.userId));
+        const isDisliked = comment.dislikesArray.map((user) => user.userId).includes(Number(command.userId));
+        let updateParams;
+        let updateParams2;
+        let update;
+        let update2;
+        let doubleOperation;
+        // If the user wants to like the comment and has not already liked or disliked it,
+        // Add the user to the list of users who liked the comment
+        if (command.likeStatus === "Like" && !isLiked && !isDisliked) {
+            update = `INSERT INTO "usersWhoPutLikeForComment" (login, "userId", "addedAt","commentId")
+        VALUES ($1, $2, $3,$4) RETURNING id`;
+            updateParams = [command.login, Number(command.userId), new Date(), Number(command.id)];
+            doubleOperation = false;
+        }
+        // If the user wants to dislike the comment and has not already liked or disliked it,
+        // Add the user to the list of users who disliked the comment
+        else if (command.likeStatus === "Dislike" && !isDisliked && !isLiked) {
+            update = `INSERT INTO "usersWhoPutDislikeForComment" (login, "userId", "addedAt","commentId")
+        VALUES ($1, $2, $3,$4) RETURNING id`;
+            updateParams = [command.login, Number(command.userId), new Date(), Number(command.id)];
+            doubleOperation = false;
+        }
+        // If the user wants to change his status to None,but don't have like or dislike status
+        else if (command.likeStatus === "None" && !isDisliked && !isLiked) {
+            return true;
+        }
+        // If the user wants to change his status to None and has already liked the comment,
+        // Remove the user from the list of users who liked the comment,
+        else if (command.likeStatus === "None" && isLiked) {
+            update = `DELETE FROM "usersWhoPutLikeForComment" WHERE "commentId" =$1 AND "userId" = $2 RETURNING id`;
+            updateParams = [Number(command.id), Number(command.userId)];
+            doubleOperation = false;
+        }
+        // If the user wants to change his status to None and has already disliked the comment,
+        // Remove the user from the list of users who disliked the comment,
+        else if (command.likeStatus === "None" && isDisliked) {
+            update = `DELETE FROM "usersWhoPutDislikeForComment" WHERE "commentId" =$1 AND userId = $2 RETURNING id`;
+            updateParams = [Number(command.id), Number(command.userId)];
+            doubleOperation = false;
+        }
+        // If the user has already liked the comment and wants to dislike it,
+        // Remove the user from the list of users who liked the comment, and add them to the list of users who disliked the comment
+        else if (isLiked && command.likeStatus === "Dislike") {
+            update = `DELETE FROM "usersWhoPutLikeForComment" WHERE "commentId" =$1 AND userId = $2`;
+            updateParams = [command.id, command.userId];
+            update2 = `INSERT INTO "usersWhoPutDislikeForComment" (login, "userId", "addedAt","commentId")
+        VALUES ($1, $2, $3,$4) RETURNING id`;
+            updateParams2 = [command.login, Number(command.userId), new Date(), Number(command.id)];
         }
 
-        return this.commentsRepository.likeOperation(command.id, update);
+        // If the user has already disliked the comment and wants to like it,
+        // Remove the user from the list of users who disliked the comment, and add them to the list of users who liked the comment
+        else if (isDisliked && command.likeStatus === "Like") {
+            update = `DELETE FROM "usersWhoPutDislikeForComment" WHERE "commentId" =$1 AND userId = $2 RETURNING id`;
+            updateParams = [Number(command.id), Number(command.userId)];
+            update = `INSERT INTO "usersWhoPutLikeForComment" (login, "userId", "addedAt","commentId")
+        VALUES ($1, $2, $3,$4) RETURNING id`;
+            updateParams = [command.login, Number(command.userId), new Date(), Number(command.id)];
+        }
+
+        return this.commentsRepository.likeOperation(update, updateParams, update2, updateParams2, doubleOperation);
     }
 }

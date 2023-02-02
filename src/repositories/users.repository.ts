@@ -1,171 +1,188 @@
 import { Injectable } from "@nestjs/common";
 import { v4 as uuidv4 } from "uuid";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
-import {
-    LoginAttemptsClass,
-    SentEmailsClass,
-    UserAccountClass,
-    UserDevicesDataClass,
-    EmailRecoveryCodeClass,
-    ExtendedBanInfoClass,
-} from "../schemas/users.schema";
-import { BanDataForUserDto, CreatedNewUserDto } from "../dtos/users.dto";
+import { BanInfoClass, CreatedNewUserDto } from "../dtos/users.dto";
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
+import { UsersClass } from "../schemas/users.schema";
+import { UserDevicesDataClass } from "../dtos/auth.dto";
 
 @Injectable()
 export class UsersRepository {
-    constructor(
-        @InjectModel(UserAccountClass.name) private usersAccountModelClass: Model<UserAccountClass>,
-        @InjectModel(LoginAttemptsClass.name) private loginAttemptsModelClass: Model<LoginAttemptsClass>,
-    ) {}
+    constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-    async userConfirmedEmail(id: string): Promise<boolean> {
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-            { $set: { "emailConfirmation.isConfirmed": true } },
+    async userConfirmedEmail(id: number): Promise<boolean> {
+        const result = await this.dataSource.query(
+            `UPDATE users SET "emailConfirmed" = true,WHERE id = $1 RETURNING id`,
+            [id],
         );
-        return result.modifiedCount === 1;
+        return result[1] > 0;
     }
 
-    async updateConfirmationCode(id: string): Promise<boolean> {
+    async updateConfirmationCode(id: number): Promise<boolean> {
         const newConfirmationCode = uuidv4();
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-            { $set: { "emailConfirmation.confirmationCode": newConfirmationCode } },
+        const result = await this.dataSource.query(
+            `UPDATE users SET "emailConfirmationCode" = $1,WHERE id = $2 RETURNING id`,
+            [newConfirmationCode, id],
         );
-        return result.modifiedCount === 1;
+        return result[1] > 0;
     }
 
-    async addLoginAttempt(id: string, ip: string): Promise<boolean> {
-        const createdLoginAttemptDto = {
-            attemptDate: new Date(),
-            ip: ip,
-        };
-        const loginAttempt: LoginAttemptsClass = new this.loginAttemptsModelClass(createdLoginAttemptDto);
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-            { $push: { loginAttempts: loginAttempt } },
+    async addLoginAttempt(id: number, ip: string): Promise<boolean> {
+        const date = new Date();
+        const result = await this.dataSource.query(
+            `INSERT INTO "loginAttempts" ("userId", "attemptDate", ip) VALUES($1, $2, $3) RETURNING id`,
+            [id, date, ip],
         );
-        return result.modifiedCount === 1;
+        return !!result[0].id;
     }
 
-    async addPasswordRecoveryCode(id: string, passwordRecoveryData: EmailRecoveryCodeClass): Promise<boolean> {
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-            { $set: { emailRecoveryCode: passwordRecoveryData } },
+    async addPasswordRecoveryCode(id: number, passwordRecoveryData: string, expirationDate: Date): Promise<boolean> {
+        const result = await this.dataSource.query(
+            `UPDATE users SET "emailRecoveryCode" = $1, "emailExpirationDate" = $2 WHERE id = $3 RETURNING id`,
+            [passwordRecoveryData, expirationDate, id],
         );
-        return result.modifiedCount === 1;
+        return result[1] > 0;
     }
 
-    async updatePasswordHash(id: string, passwordHash: string): Promise<boolean> {
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-            { $set: { passwordHash: passwordHash } },
-        );
-        return result.modifiedCount === 1;
+    async updatePasswordHash(id: number, passwordHash: string): Promise<boolean> {
+        const result = await this.dataSource.query(`UPDATE users SET "passwordHash" = $1,WHERE id = $2 RETURNING id`, [
+            passwordHash,
+            id,
+        ]);
+        return result[1] > 0;
     }
 
-    async addUserDevicesData(id: string, userDevicesData: UserDevicesDataClass): Promise<boolean> {
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-            { $push: { userDevicesData: userDevicesData } },
+    async addUserDevicesData(id: number, ip: string, deviceId: string, title: string): Promise<boolean> {
+        if (!title) {
+            title = "Unknown";
+        }
+        const date = new Date();
+        const result = await this.dataSource.query(
+            `INSERT INTO devices ("userId", ip, "lastActiveDate", "deviceId", title) 
+        VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+            [id, ip, date, deviceId, title],
         );
-        return result.modifiedCount === 1;
+        return !!result[0].id;
     }
 
-    async addCurrentSession(id: string, userDevicesData: UserDevicesDataClass): Promise<boolean> {
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-            { $set: { currentSession: userDevicesData } },
+    async addCurrentSession(id: number, ip: string, deviceId: string, title: string): Promise<boolean> {
+        if (!title) {
+            title = "Unknown";
+        }
+        const date = new Date();
+        const result = await this.dataSource.query(
+            `UPDATE users SET "currentSessionLastActiveDate" = $1,"currentSessionIp" = $2, "currentSessionDeviceId" = $3, "currentSessionTitle" = $4 WHERE id = $5 RETURNING id`,
+            [date, ip, deviceId, title, id],
         );
-        return result.modifiedCount === 1;
+        return result[1] > 0;
     }
 
     async updateLastActiveDate(deviceId: string, newLastActiveDate: Date): Promise<boolean> {
-        const result = await this.usersAccountModelClass.updateOne(
-            { "userDevicesData.deviceId": deviceId },
-            { $set: { "userDevicesData.$.lastActiveDate": newLastActiveDate } },
+        const result = await this.dataSource.query(
+            `UPDATE devices SET "lastActiveDate" = $1 WHERE "deviceId" = $2 RETURNING id`,
+            [newLastActiveDate, deviceId],
         );
-        return result.modifiedCount === 1;
+        return result[1] > 0;
     }
 
-    async terminateAllDevices(id: string, userDevicesData: UserDevicesDataClass): Promise<boolean> {
-        await this.usersAccountModelClass.updateOne({ id: id }, { $set: { userDevicesData: [] } });
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-            { $push: { userDevicesData: userDevicesData } },
+    async terminateAllDevices(id: number, userDevicesData: UserDevicesDataClass): Promise<boolean> {
+        if (!userDevicesData.title) {
+            userDevicesData.title = "Unknown";
+        }
+        await this.dataSource.query(`DELETE FROM devices WHERE "userId" = $1`, [id]);
+        const result = await this.dataSource.query(
+            `INSERT INTO devices ("userId", ip, "lastActiveDate", "deviceId", title) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+            [id, userDevicesData.ip, new Date(), userDevicesData.deviceId, userDevicesData.title],
         );
-        return result.modifiedCount === 1;
+        return !!result[0].id;
     }
 
-    async terminateSpecificDevice(id: string, deviceId: string): Promise<boolean> {
-        const result = await this.usersAccountModelClass.updateOne(
-            { id: id },
-
-            { $pull: { userDevicesData: { deviceId: deviceId } } },
-        );
-        return result.modifiedCount === 1;
+    async terminateSpecificDevice(id: number, deviceId: string): Promise<boolean> {
+        const result = await this.dataSource.query(`DELETE FROM devices,WHERE "deviceId" = $1 RETURNING id`, [
+            deviceId,
+        ]);
+        return result[1] > 0;
     }
 
     async addEmailLog(email: string): Promise<boolean> {
-        const emailData: SentEmailsClass = new SentEmailsClass();
-        const result = await this.usersAccountModelClass.updateOne(
-            { email: email },
-            { $push: { "emailConfirmation.sentEmails": emailData } },
+        const result = await this.dataSource.query(
+            `UPDATE users SET "sentEmails" = sentEmails || '{${email}}' WHERE email = $1 RETURNING id`,
+            [email],
         );
-        return result.modifiedCount === 1;
+        return result[1] > 0;
     }
 
-    async createUser(newUser: CreatedNewUserDto): Promise<UserAccountClass> {
-        if (newUser.banInfo.isBanned) {
-            await this.usersAccountModelClass.updateOne({ id: newUser.id }, { $set: { userId: newUser.id } });
-        }
-        const user = new this.usersAccountModelClass(newUser);
-        await user.save();
-        return user;
+    async createUser(newUser: CreatedNewUserDto): Promise<UsersClass> {
+        const result = await this.dataSource.query(
+            `INSERT INTO users (login, email, "passwordHash", "createdAt", "emailConfirmed", "emailConfirmationCode", "emailExpirationDate",
+            "emailRecoveryCode", "emailRecoveryExpirationDate", "isBanned", "banDate", "banReason", "currentSessionLastActiveDate", "currentSessionDeviceId",
+             "currentSessionIp", "currentSessionTitle")
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *`,
+            [
+                newUser.login,
+                newUser.email,
+                newUser.passwordHash,
+                newUser.createdAt,
+                newUser.emailConfirmed,
+                newUser.emailConfirmationCode,
+                newUser.emailExpirationDate,
+                newUser.emailRecoveryCode,
+                newUser.emailRecoveryExpirationDate,
+                newUser.isBanned,
+                newUser.banDate,
+                newUser.banReason,
+                newUser.currentSessionLastActiveDate,
+                newUser.currentSessionDeviceId,
+                newUser.currentSessionIp,
+                newUser.currentSessionTitle,
+            ],
+        );
+        return result[0];
     }
 
-    async deleteUserById(id: string): Promise<boolean> {
-        const result = await this.usersAccountModelClass.deleteOne({ id: id });
-        return result.deletedCount === 1;
+    async deleteUserById(id: number): Promise<boolean> {
+        await this.dataSource.query(`DELETE FROM users WHERE id = $1 RETURNING id`, [id]);
+        await this.dataSource.query(`DELETE FROM devices WHERE "userId" = $1 RETURNING id`, [id]);
+        await this.dataSource.query(`DELETE FROM "loginAttempts" WHERE "userId" = $1 RETURNING id`, [id]);
+        const result = await this.dataSource.query(`DELETE FROM "bannedBlogs" WHERE "userId" = $1 RETURNING id`, [id]);
+        return result[1] > 0;
     }
 
-    async banUnbanUserBySuperAdmin(banData: BanDataForUserDto, userId: string): Promise<boolean> {
-        await this.usersAccountModelClass.updateOne({ id: userId }, { $set: { userDevicesData: [] } });
-        const result = await this.usersAccountModelClass.updateOne({ id: userId }, { $set: { banInfo: banData } });
-        return result.modifiedCount === 1;
+    async banUnbanUserBySuperAdmin(banData: BanInfoClass, userId: string): Promise<boolean> {
+        await this.dataSource.query(`DELETE FROM devices WHERE "userId" = $1 RETURNING id`, [userId]);
+        const result = await this.dataSource.query(
+            `UPDATE users SET "isBanned" = $1, "banDate" = $2, "banReason" = $3 WHERE id = $4 RETURNING id`,
+            [banData.isBanned, banData.banDate, banData.banReason, userId],
+        );
+        return result[1] > 0;
     }
 
     async banUnbanUserByBloggerForBlog(
         isBanned: boolean,
         banReason: string,
-        blogId: string,
-        userId: string,
+        blogId: number,
+        userId: number,
     ): Promise<boolean> {
         let result;
-        const banData: ExtendedBanInfoClass = {
-            isBanned: isBanned,
-            banDate: new Date(),
-            banReason: banReason,
-            blogId: blogId,
-        };
-        const blogIsAlreadyBanned = await this.usersAccountModelClass.findOne({
-            $and: [{ id: userId }, { "banInfoForBlogs.blogId": blogId }, { "banInfoForBlogs.isBanned": true }],
-        });
-        if (blogIsAlreadyBanned && isBanned) {
+        const blogIsAlreadyBanned = await this.dataSource.query(
+            `SELECT * FROM "bannedBlogs" WHERE "userId" = $1 AND "blogId" = $2 AND "isBanned" = true`,
+            [userId, blogId],
+        );
+        if (!!blogIsAlreadyBanned[0] && isBanned) {
             return true;
         }
         if (isBanned) {
-            result = await this.usersAccountModelClass.updateOne(
-                { id: userId },
-                { $push: { banInfoForBlogs: banData } },
+            const date = new Date();
+            result = await this.dataSource.query(
+                `INSERT INTO "bannedBlogs" ("userId", "blogId", "isBanned", "banDate", "banReason") VALUES ($1,$2,true,$3,$4) RETURNING id`,
+                [userId, blogId, date, banReason],
             );
+            return !!result[0];
         } else {
-            result = await this.usersAccountModelClass.updateOne(
-                { id: userId },
-                { $pull: { banInfoForBlogs: { blogId: blogId } } },
-            );
+            result = await this.dataSource.query(`DELETE FROM "bannedBlogs" WHERE "userId" = $1 RETURNING id`, [
+                userId,
+            ]);
+            return result[1] > 0;
         }
-        return result.modifiedCount === 1;
     }
 }

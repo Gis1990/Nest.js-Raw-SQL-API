@@ -1,59 +1,158 @@
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
-import { CommentClass } from "../schemas/comments.schema";
-import { QueryDto } from "../dtos/blogs.dto";
-import { CommentClassPaginationDto } from "../dtos/comments.dto";
+import { CommentsClass } from "../schemas/comments.schema";
+import { CommentClassPaginationDto, ModelForGettingAllComments } from "../dtos/comments.dto";
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
 
 export class CommentsQueryRepository {
-    constructor(@InjectModel(CommentClass.name) private commentsModelClass: Model<CommentClass>) {}
+    constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-    async getCommentById(id: string): Promise<CommentClass | null> {
-        const comment = await this.commentsModelClass.findOne({ id: id });
-        if (!comment) {
-            return null;
+    async getCommentById(id: number, userId: string | undefined): Promise<CommentsClass | null> {
+        if (userId) {
+            Number(userId);
         }
-        return comment;
+        const result = await this.dataSource.query(
+            `SELECT comments.*, COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
+        CASE
+        WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
+        WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
+        ELSE 'None'
+        END AS "myStatus"
+        FROM comments
+        JOIN users ON comments."commentOwnerUserId" = users.id
+        JOIN posts ON comments."postId" = posts.id
+        JOIN blogs ON posts."blogId" = blogs.id
+        LEFT JOIN "usersWhoPutLikeForComment" ON "comments".id = "usersWhoPutLikeForComment"."commentId"
+        LEFT JOIN "usersWhoPutDislikeForComment" ON "comments".id = "usersWhoPutDislikeForComment"."commentId"
+        WHERE users."isBanned" = false
+        AND blogs."isBanned" = false
+        AND comments.id = $2
+        AND users.id NOT IN (
+        SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+        GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",comments."commentOwnerUserLogin"`,
+            [userId, id],
+        );
+        return result[0] || null;
     }
 
     async getAllCommentsForSpecificPost(
-        queryDtoForComments: QueryDto,
-        postId: string,
+        dto: ModelForGettingAllComments,
+        postId: number,
+        userId: string | undefined,
     ): Promise<CommentClassPaginationDto> {
-        const cursor = await this.commentsModelClass
-            .find({ $and: [queryDtoForComments.query, { postId: postId }] })
-            .sort(queryDtoForComments.sortObj)
-            .skip(queryDtoForComments.skips)
-            .limit(queryDtoForComments.pageSize);
-        const totalCount = await this.commentsModelClass.count({ postId: postId });
+        if (userId) {
+            Number(userId);
+        }
+        const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;
+        const sort = sortDirection === "desc" ? `DESC` : `ASC`;
+        const offset = pageSize * (pageNumber - 1);
+        const queryParamsForAllPosts: any = [userId, postId, pageSize, offset];
+        const query = `SELECT comments.*, COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
+        CASE
+        WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
+        WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
+        ELSE 'None'
+        END AS "myStatus"
+        FROM comments
+        JOIN users ON comments."commentOwnerUserId" = users.id
+        JOIN posts ON comments."postId" = posts.id
+        JOIN blogs ON posts."blogId" = blogs.id
+        LEFT JOIN "usersWhoPutLikeForComment" ON "comments".id = "usersWhoPutLikeForComment"."commentId"
+        LEFT JOIN "usersWhoPutDislikeForComment" ON "comments".id = "usersWhoPutDislikeForComment"."commentId"
+        WHERE users."isBanned" = false
+        AND blogs."isBanned" = false
+        AND comments."postId" = $2
+        AND users.id NOT IN (
+        SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+        GROUP BY comments.id
+        ORDER BY posts."${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
+        const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
+
+        const totalCount = await this.dataSource.query(
+            `SELECT COUNT(*) FROM comments  
+        JOIN users ON comments."commentOwnerUserId" = users.id
+        JOIN posts ON comments."postId" = posts.id
+        JOIN blogs ON posts."blogId" = blogs.id
+        WHERE users."isBanned" = false 
+        AND blogs."isBanned" = false 
+        AND comments."postId" = $1
+        AND users.id NOT IN (
+        SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)`,
+            [postId],
+        );
         return {
-            pagesCount: Math.ceil(totalCount / queryDtoForComments.pageSize),
-            page: queryDtoForComments.pageNumber,
-            pageSize: queryDtoForComments.pageSize,
-            totalCount: totalCount,
+            pagesCount: Math.ceil(Number(totalCount[0].count) / pageSize),
+            page: pageNumber,
+            pageSize: pageSize,
+            totalCount: Number(totalCount[0].count),
             items: cursor,
         };
     }
 
     async getAllCommentsForAllPostsForBloggersBlogs(
-        queryDtoForComments: QueryDto,
-        allBannedBlogsIds: string[],
+        dto: ModelForGettingAllComments,
+        userId: string | undefined,
     ): Promise<CommentClassPaginationDto> {
-        const cursor = await this.commentsModelClass
-            .find({ $and: [queryDtoForComments.query, { "postInfo.blogId": { $nin: [...allBannedBlogsIds] } }] }, {})
-            .sort(queryDtoForComments.sortObj)
-            .skip(queryDtoForComments.skips)
-            .limit(queryDtoForComments.pageSize);
-        const totalCount = await this.commentsModelClass.count({ id: { $nin: [...allBannedBlogsIds] } });
+        if (userId) {
+            Number(userId);
+        }
+        const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;
+        const sort = sortDirection === "desc" ? `DESC` : `ASC`;
+        const offset = pageSize * (pageNumber - 1);
+        const queryParamsForAllPosts: any = [userId, pageSize, offset];
+        const query = `SELECT comments.*,posts.title,posts."blogId",blogs."name", COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
+        CASE
+        WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
+        WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
+        ELSE 'None'
+        END AS "myStatus"
+        FROM comments
+        JOIN users ON comments."commentOwnerUserId" = users.id
+        JOIN posts ON comments."postId" = posts.id
+        JOIN blogs ON posts."blogId" = blogs.id
+        LEFT JOIN "usersWhoPutLikeForComment" ON "comments".id = "usersWhoPutLikeForComment"."commentId"
+        LEFT JOIN "usersWhoPutDislikeForComment" ON "comments".id = "usersWhoPutDislikeForComment"."commentId"
+        WHERE users."isBanned" = false
+        AND blogs."isBanned" = false
+        AND blogs."blogOwnerUserId" = $1
+        AND users.id NOT IN (
+        SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+        GROUP BY comments.id,posts.title,posts."blogId",blogs."name"
+        ORDER BY posts."${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
+        const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
+
+        const totalCount = await this.dataSource.query(
+            `SELECT COUNT(*) FROM posts WHERE JOIN users ON posts."postOwnerUserId" = users.id 
+        JOIN blogs ON posts."blogId" = blogs.id 
+        WHERE users."isBanned" = false 
+        AND blogs."isBanned" = false 
+        AND blogs."blogOwnerUserId" = $1
+        AND users.id NOT IN (
+        SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)`,
+            [userId],
+        );
         return {
-            pagesCount: Math.ceil(totalCount / queryDtoForComments.pageSize),
-            page: queryDtoForComments.pageNumber,
-            pageSize: queryDtoForComments.pageSize,
-            totalCount: totalCount,
+            pagesCount: Math.ceil(Number(totalCount[0].count) / pageSize),
+            page: pageNumber,
+            pageSize: pageSize,
+            totalCount: Number(totalCount[0].count),
             items: cursor,
         };
     }
 
-    async getCommentByIdForLikeOperation(id: string): Promise<CommentClass> {
-        return this.commentsModelClass.findOne({ id: id });
+    async getCommentByIdForLikeOperation(id: number): Promise<CommentsClass> {
+        const result = await this.dataSource.query(`SELECT * FROM comments WHERE id = $1`, [id]);
+        if (!result[0]) {
+            return null;
+        } else {
+            result[0].likesArray = await this.dataSource.query(
+                `SELECT * FROM "usersWhoPutLikeForComment" WHERE "postId" = $1`,
+                [id],
+            );
+            result[0].dislikesArray = await this.dataSource.query(
+                `SELECT * FROM "usersWhoPutDislikeForComment" WHERE "postId" = $1`,
+                [id],
+            );
+            return result[0];
+        }
     }
 }

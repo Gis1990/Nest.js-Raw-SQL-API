@@ -1,6 +1,5 @@
 import { InputModelForCreatingAndUpdatingPost } from "../../dtos/posts.dto";
 import { PostViewModelClass } from "../../entities/posts.entity";
-import { ExtendedLikesInfoClass, UsersLikesInfoClass } from "../../schemas/posts.schema";
 import { PostsRepository } from "../../repositories/posts.repository";
 import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
 import { HttpException } from "@nestjs/common";
@@ -18,21 +17,14 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
 
     async execute(command: CreatePostCommand): Promise<PostViewModelClass> {
         const blog = await this.queryBus.execute(new GetBlogByIdCommand(command.dto.blogId));
-        if (blog.blogOwnerInfo.userId !== command.user.id) throw new HttpException("Access denied", 403);
-        let blogName;
-        blog ? (blogName = blog.name) : (blogName = "");
-        const extendedLikesInfo: ExtendedLikesInfoClass = new ExtendedLikesInfoClass();
-        const usersLikes: UsersLikesInfoClass = new UsersLikesInfoClass();
+        if (blog.blogOwnerUserId !== command.user.id) throw new HttpException("Access denied", 403);
         const createdPostDto = {
-            id: Number(new Date()).toString(),
             title: command.dto.title,
             shortDescription: command.dto.shortDescription,
             content: command.dto.content,
-            blogId: command.dto.blogId,
-            blogName: blogName,
             createdAt: new Date(),
-            extendedLikesInfo: extendedLikesInfo,
-            usersLikesInfo: usersLikes,
+            blogId: Number(command.dto.blogId),
+            postOwnerUserId: Number(command.user.id),
         };
         const createdPost = await this.postsRepository.createPost(createdPostDto);
         return await PostsFactory.createPostViewModelClass(createdPost);

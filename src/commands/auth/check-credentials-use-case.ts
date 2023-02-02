@@ -1,7 +1,5 @@
 import { BcryptService } from "../../modules/utils/bcrypt/bcrypt.service";
-import { UserAccountClass, UserDevicesDataClass } from "../../schemas/users.schema";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { UsersClass } from "../../schemas/users.schema";
 import { UsersRepository } from "../../repositories/users.repository";
 import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
 import { GetUserByIdCommand } from "../../queries/users/get-user-by-id-query";
@@ -22,24 +20,26 @@ export class CheckCredentialsUseCase implements ICommandHandler<CheckCredentials
         private queryBus: QueryBus,
         private usersRepository: UsersRepository,
         private bcryptService: BcryptService,
-        @InjectModel(UserDevicesDataClass.name) private userDevicesDataModelClass: Model<UserDevicesDataClass>,
     ) {}
 
-    async execute(command: CheckCredentialsCommand): Promise<UserAccountClass | null> {
+    async execute(command: CheckCredentialsCommand): Promise<UsersClass | null> {
         const user = await this.queryBus.execute(new GetUserByLoginOrEmailCommand(command.loginOrEmail));
         if (!user) return null;
         await this.usersRepository.addLoginAttempt(user.id, command.ip);
         const isHashesEqual = await this.bcryptService._isHashesEquals(command.password, user.passwordHash);
-        if (isHashesEqual && user.emailConfirmation.isConfirmed) {
-            const createdUserDevicesData = {
-                ip: command.ip,
-                lastActiveDate: new Date(),
-                title: command.title,
-                deviceId: Number(new Date()).toString(),
-            };
-            const userDevicesData: UserDevicesDataClass = new this.userDevicesDataModelClass(createdUserDevicesData);
-            await this.usersRepository.addUserDevicesData(user.id, userDevicesData);
-            await this.usersRepository.addCurrentSession(user.id, userDevicesData);
+        if (isHashesEqual && user.emailConfirmed) {
+            await this.usersRepository.addUserDevicesData(
+                user.id,
+                command.ip,
+                Number(new Date()).toString(),
+                command.title,
+            );
+            await this.usersRepository.addCurrentSession(
+                user.id,
+                command.ip,
+                Number(new Date()).toString(),
+                command.title,
+            );
             return await this.queryBus.execute(new GetUserByIdCommand(user.id));
         } else {
             return null;

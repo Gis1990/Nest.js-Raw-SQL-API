@@ -1,15 +1,8 @@
 import { IsString, Length, Matches, IsNotEmpty, IsNumber, IsOptional, IsBoolean, IsIn } from "class-validator";
 import { IsEmailExist, IsLoginExist, IsUsersIdExist } from "../decorators/users/users.custom.decorators";
 import { Transform, TransformFnParams, Type } from "class-transformer";
-import {
-    LoginAttemptsClass,
-    UserAccountEmailClass,
-    UserDevicesDataClass,
-    EmailRecoveryCodeClass,
-    BanInfoClass,
-    UserAccountClass,
-} from "../schemas/users.schema";
 import { IsBlogsIdExistInTheRequestBody } from "../decorators/blogs/blogs.custom.decorators";
+import { UsersClass } from "../schemas/users.schema";
 
 const pattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 const listOfCorrectBanStatus = ["all", "banned", "notBanned"];
@@ -111,20 +104,26 @@ export class ModelForGettingAllBannedUsersForBlog {
 }
 
 export class CreatedNewUserDto {
-    public id: string;
     public login: string;
     public email: string;
     public passwordHash: string;
     public createdAt: Date;
-    public emailRecoveryCode: EmailRecoveryCodeClass;
-    public loginAttempts: LoginAttemptsClass[];
-    public emailConfirmation: UserAccountEmailClass;
-    public userDevicesData: UserDevicesDataClass[];
-    public currentSession: UserDevicesDataClass;
-    public banInfo: BanInfoClass;
+    public emailConfirmed: boolean;
+    public emailConfirmationCode: string;
+    public emailExpirationDate: Date;
+    public emailRecoveryCode: string | null;
+    public emailRecoveryExpirationDate: Date | null;
+    public isBanned: boolean;
+    public banDate: Date | null;
+    public banReason: string | null;
+    public currentSessionLastActiveDate: string | null;
+    public currentSessionDeviceId: string | null;
+    public currentSessionIp: string | null;
+    public currentSessionTitle: string | null;
+    public sentEmails: [];
 }
 
-export class BanDataForUserDto {
+export class BanInfoClass {
     public isBanned: boolean;
     public banDate: Date;
     public banReason: string;
@@ -135,5 +134,14 @@ export class UsersClassPaginationDto {
     public page: number;
     public pageSize: number;
     public totalCount: number;
-    public items: UserAccountClass[];
+    public items: UsersClass[];
+}
+
+export class UserModelClass {
+    public id: string;
+    public login: string;
+    public email: string;
+    public currentSession: any;
+    public banInfo: any;
+    public userDevicesData: any;
 }

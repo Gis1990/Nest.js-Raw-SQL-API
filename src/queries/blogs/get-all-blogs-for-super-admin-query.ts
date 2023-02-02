@@ -2,11 +2,10 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BlogsQueryRepository } from "../../query-repositories/blogs.query.repository";
 import { ModelForGettingAllBlogs } from "../../dtos/blogs.dto";
 import { BlogViewModelClassPagination } from "../../entities/blogs.entity";
-import { HelperForBlogs } from "../../query-repositories/helpers/helpers.for.blogs.query.repository";
 import { BlogsFactory } from "../../factories/blogs.factory";
 
 export class GetAllBlogsForSuperAdminCommand {
-    constructor(public dto: ModelForGettingAllBlogs) {}
+    constructor(public readonly dto: ModelForGettingAllBlogs) {}
 }
 
 @QueryHandler(GetAllBlogsForSuperAdminCommand)
@@ -14,8 +13,7 @@ export class GetAllBlogsForSuperAdminQuery implements IQueryHandler<GetAllBlogsF
     constructor(private blogsQueryRepository: BlogsQueryRepository) {}
 
     async execute(query: GetAllBlogsForSuperAdminCommand): Promise<BlogViewModelClassPagination> {
-        const dto = HelperForBlogs.createQuery(query.dto);
-        const result = await this.blogsQueryRepository.getAllBlogsForSuperAdmin(dto);
+        const result = await this.blogsQueryRepository.getAllBlogsForSuperAdmin(query.dto);
         return await BlogsFactory.createBlogViewModelPaginationClass(result);
     }
 }

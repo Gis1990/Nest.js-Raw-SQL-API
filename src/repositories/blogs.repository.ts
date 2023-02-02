@@ -1,53 +1,85 @@
 import { Injectable } from "@nestjs/common";
-import { Model } from "mongoose";
-import { InjectModel } from "@nestjs/mongoose";
-import { BlogClass } from "../schemas/blogs.schema";
 import { CreatedBlogDto, ForBanUnbanBlogBySuperAdminDto, InputModelForUpdatingBlog } from "../dtos/blogs.dto";
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
+import { BlogClass } from "../schemas/blogs.schema";
 
 @Injectable()
 export class BlogsRepository {
-    constructor(@InjectModel(BlogClass.name) private blogsModelClass: Model<BlogClass>) {}
+    constructor(@InjectDataSource() private dataSource: DataSource) {}
 
     async createBlog(newBlog: CreatedBlogDto): Promise<BlogClass> {
-        const blog = new this.blogsModelClass(newBlog);
-        await blog.save();
-        return blog;
+        const query = `INSERT INTO blogs (name, description, "websiteUrl", "createdAt", "isBanned", "banDate", "blogOwnerUserId", "blogOwnerUserLogin") 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
+        const values = [
+            newBlog.name,
+            newBlog.description,
+            newBlog.websiteUrl,
+            newBlog.createdAt,
+            newBlog.banInfo.isBanned,
+            newBlog.banInfo.banDate,
+            newBlog.blogOwnerInfo.userId,
+            newBlog.blogOwnerInfo.userLogin,
+        ];
+        const result = await this.dataSource.query(query, values);
+        return result[0];
     }
 
-    async updateBlog(blogId: string, dto: InputModelForUpdatingBlog): Promise<boolean> {
+    async updateBlog(blogId: number, dto: InputModelForUpdatingBlog): Promise<boolean> {
         const name = dto.name;
         const description = dto.description;
         const websiteUrl = dto.websiteUrl;
-        const result = await this.blogsModelClass.updateOne(
-            { id: blogId },
-            { $set: { name, description, websiteUrl } },
+        const result = await this.dataSource.query(
+            `UPDATE blogs SET name = $1, description = $2,"websiteUrl" = $3 WHERE id = $4 RETURNING id`,
+            [name, description, websiteUrl, blogId],
         );
-        return result.matchedCount === 1;
+        return result[1] > 0;
     }
 
-    async deleteBlogById(id: string): Promise<boolean> {
-        const result = await this.blogsModelClass.deleteOne({ id: id });
-        return result.deletedCount === 1;
+    async deleteBlogById(id: number): Promise<boolean> {
+        await this.dataSource.query(
+            `DELETE FROM "usersWhoPutDislikeForPost" WHERE "postId" IN (SELECT id FROM posts WHERE "blogId" = $1)`,
+            [id],
+        );
+        await this.dataSource.query(
+            `DELETE FROM "usersWhoPutLikeForPost" WHERE "postId" IN (SELECT id FROM posts WHERE "blogId" = $1)`,
+            [id],
+        );
+        await this.dataSource.query(
+            `DELETE FROM "usersWhoPutDislikeForComment" 
+        WHERE "commentId" IN (SELECT id FROM comments WHERE "postId" IN (SELECT id FROM posts WHERE "blogId" = $1))`,
+            [id],
+        );
+        await this.dataSource.query(
+            `DELETE FROM "usersWhoPutLikeForComment" 
+        WHERE "commentId" IN (SELECT id FROM comments WHERE "postId" IN (SELECT id FROM posts WHERE "blogId" = $1))`,
+            [id],
+        );
+        await this.dataSource.query(
+            `DELETE FROM comments WHERE "postId" IN (SELECT id FROM posts WHERE "blogId" = $1)`,
+            [id],
+        );
+        await this.dataSource.query(`DELETE FROM posts WHERE "blogId" = $1`, [id]);
+        const result = await this.dataSource.query(`DELETE FROM blogs WHERE id = $1 RETURNING id`, [id]);
+        return result[1] > 0;
     }
 
-    async bindUserWithBlog(blogId: string, userId: string, login: string): Promise<boolean> {
-        const result = await this.blogsModelClass.updateOne(
-            { id: blogId },
-            { blogOwnerInfo: { userId: userId, userLogin: login } },
+    async bindUserWithBlog(blogId: number, userId: number, login: string): Promise<boolean> {
+        const result = await this.dataSource.query(
+            `UPDATE blogs SET "blogOwnerUserId" = $1 "blogOwnerUserLogin" = $2 WHERE id = $3 RETURNING id`,
+            [userId, login, blogId],
         );
-        return result.matchedCount === 1;
+        return result[1] > 0;
     }
 
     async banUnbanBlogBySuperAdmin(
         dtoForBanUnbanBlogBySuperAdmin: ForBanUnbanBlogBySuperAdminDto,
-        blogId: string,
+        blogId: number,
     ): Promise<boolean> {
-        let result;
-        if (dtoForBanUnbanBlogBySuperAdmin.isBanned) {
-            result = await this.blogsModelClass.updateOne({ id: blogId }, { banInfo: dtoForBanUnbanBlogBySuperAdmin });
-        } else {
-            result = await this.blogsModelClass.updateOne({ id: blogId }, { banInfo: dtoForBanUnbanBlogBySuperAdmin });
-        }
-        return result.matchedCount === 1;
+        const result = await this.dataSource.query(
+            `UPDATE blogs SET "isBanned" = $1, "banDate" = $2 WHERE id = $3 RETURNING id`,
+            [dtoForBanUnbanBlogBySuperAdmin.isBanned, dtoForBanUnbanBlogBySuperAdmin.banDate, blogId],
+        );
+        return result[1] > 0;
     }
 }

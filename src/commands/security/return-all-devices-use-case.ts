@@ -1,5 +1,4 @@
-import { UserDevicesDataClass } from "../../schemas/users.schema";
-import { CurrentUserWithDevicesDataModel } from "../../dtos/auth.dto";
+import { CurrentUserWithDevicesDataModel, UserDevicesDataClass } from "../../dtos/auth.dto";
 import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
 import { GetUserByIdCommand } from "../../queries/users/get-user-by-id-query";
 

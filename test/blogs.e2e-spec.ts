@@ -2,7 +2,6 @@ import "reflect-metadata";
 import * as request from "supertest";
 import {
     app,
-    CheckingDbEmptiness,
     createBlogForTests,
     createPostForTesting,
     CreatingUsersForTesting,
@@ -18,7 +17,6 @@ describe("blogs endpoint (e2e)", () => {
     beforeAll(async () => {
         await setupTestApp();
         await request(app.getHttpServer()).delete("/testing/all-data").expect(204);
-        await CheckingDbEmptiness();
         const result = await CreatingUsersForTesting();
         accessTokenForUser1 = result.accessTokenForUser1;
         accessTokenForUser2 = result.accessTokenForUser2;

@@ -93,7 +93,7 @@ export class IsEmailExistOrConfirmedConstraint implements ValidatorConstraintInt
         if (!user) {
             return false;
         } else {
-            return !user.emailConfirmation.isConfirmed;
+            return !user.emailConfirmed;
         }
     }
 }

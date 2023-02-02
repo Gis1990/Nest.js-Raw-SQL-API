@@ -1,31 +1,13 @@
-import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
 import { BadRequestException, INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { useContainer } from "class-validator";
 import * as cookieParser from "cookie-parser";
-import { MongooseModule } from "@nestjs/mongoose";
 import * as request from "supertest";
-import { BlogClass, BlogsSchema } from "../src/schemas/blogs.schema";
 import { AppModule } from "../src/app.module";
-import {
-    EmailRecoveryCodeClass,
-    EmailRecoveryCodeSchema,
-    LoginAttemptsClass,
-    LoginAttemptsSchema,
-    UserAccountClass,
-    UserAccountEmailClass,
-    UserAccountEmailSchema,
-    UserDevicesDataClass,
-    UserDevicesDataSchema,
-    UsersAccountSchema,
-} from "../src/schemas/users.schema";
-import { NewestLikesClass, NewestLikesSchema, PostClass, PostsSchema } from "../src/schemas/posts.schema";
-import { CommentClass, CommentsSchema } from "../src/schemas/comments.schema";
 import { HttpExceptionFilter } from "../src/exception.filter";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 export let app: INestApplication;
-let mongoServer: MongoMemoryServer;
 
 export const testValidationPipeSettings = {
     transform: true,
@@ -46,53 +28,19 @@ export const testValidationPipeSettings = {
 };
 
 export async function setupTestApp() {
-    mongoose.set("strictQuery", true);
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [
             AppModule,
-            MongooseModule.forRoot(mongoUri, { useNewUrlParser: true }),
-            MongooseModule.forFeature([
-                {
-                    name: BlogClass.name,
-                    schema: BlogsSchema,
-                },
-                {
-                    name: CommentClass.name,
-                    schema: CommentsSchema,
-                },
-                {
-                    name: PostClass.name,
-                    schema: PostsSchema,
-                },
-                {
-                    name: UserAccountClass.name,
-                    schema: UsersAccountSchema,
-                },
-                {
-                    name: UserAccountEmailClass.name,
-                    schema: UserAccountEmailSchema,
-                },
-                {
-                    name: UserDevicesDataClass.name,
-                    schema: UserDevicesDataSchema,
-                },
-                {
-                    name: EmailRecoveryCodeClass.name,
-                    schema: EmailRecoveryCodeSchema,
-                },
-                {
-                    name: LoginAttemptsClass.name,
-                    schema: LoginAttemptsSchema,
-                },
-                {
-                    name: NewestLikesClass.name,
-                    schema: NewestLikesSchema,
-                },
-            ]),
+            TypeOrmModule.forRoot({
+                type: "postgres",
+                host: "localhost",
+                port: 5432,
+                username: "nodejs",
+                password: "nodejs",
+                database: "Bloggers",
+                autoLoadEntities: false,
+                synchronize: false,
+            }),
         ],
     }).compile();
 
@@ -106,27 +54,7 @@ export async function setupTestApp() {
 }
 
 export async function teardownTestApp() {
-    await mongoose.disconnect();
-    await mongoServer.stop();
     await app.close();
-}
-
-export async function CheckingDbEmptiness() {
-    await request(app.getHttpServer()).delete("/testing/all-data").expect(204);
-    const response = await request(app.getHttpServer())
-        .get("/sa/users")
-        .set("authorization", "Basic YWRtaW46cXdlcnR5")
-        .expect(200);
-    expect(response.body).toStrictEqual(emptyAllUsersDbReturnData);
-    const response1 = await request(app.getHttpServer()).get("/blogs").expect(200);
-    expect(response1.body).toStrictEqual(emptyAllBlogsDbReturnData);
-    const response2 = await request(app.getHttpServer())
-        .get("/sa/blogs")
-        .set("authorization", "Basic YWRtaW46cXdlcnR5")
-        .expect(200);
-    expect(response2.body).toStrictEqual(emptyAllBlogsDbReturnData);
-    const response3 = await request(app.getHttpServer()).get("/posts").expect(200);
-    expect(response3.body).toStrictEqual(emptyAllPostsDbReturnData);
 }
 
 export async function CreatingUsersForTesting() {
@@ -247,8 +175,10 @@ export const createOutputCommentForTesting = (
     return {
         id: expect.any(String),
         content: randomString(contentLen),
-        userId: userId,
-        userLogin: userLogin,
+        commentatorInfo: {
+            userId: userId,
+            userLogin: userLogin,
+        },
         createdAt: expect.any(String),
         likesInfo: {
             likesCount: 0,

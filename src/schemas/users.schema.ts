@@ -1,180 +1,112 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Schema({ versionKey: false, _id: false })
-export class LoginAttemptsClass {
-    @Prop({
-        required: true,
-    })
-    attemptDate: Date;
-    @Prop({
-        required: true,
-    })
-    ip: string;
-}
+@Entity()
+export class UsersClass {
+    @PrimaryGeneratedColumn()
+    id: number;
 
-export const LoginAttemptsSchema = SchemaFactory.createForClass(LoginAttemptsClass);
+    @Column()
+    login: string;
 
-@Schema({ versionKey: false, _id: false })
-export class SentEmailsClass {
-    @Prop({
-        required: true,
-        default: new Date().toString(),
-    })
-    sentDate: string;
-}
+    @Column()
+    email: string;
 
-export const SentEmailsSchema = SchemaFactory.createForClass(SentEmailsClass);
+    @Column()
+    passwordHash: string;
 
-@Schema({ versionKey: false, _id: false })
-export class EmailRecoveryCodeClass {
-    @Prop({
-        required: true,
-        default: "No code",
-    })
-    recoveryCode: string;
-    @Prop({
-        required: true,
-        default: new Date(),
-    })
-    expirationDate: Date;
-}
+    @Column()
+    createdAt: Date;
 
-export const EmailRecoveryCodeSchema = SchemaFactory.createForClass(EmailRecoveryCodeClass);
+    @Column()
+    emailConfirmed: boolean;
 
-@Schema({ versionKey: false, _id: false })
-export class UserAccountEmailClass {
-    @Prop({
-        required: true,
-    })
-    isConfirmed: boolean;
-    @Prop({
-        required: true,
-    })
-    confirmationCode: string;
-    @Prop({
-        required: true,
-    })
-    expirationDate: Date;
-    @Prop({
-        type: [SentEmailsSchema],
-        required: true,
-        _id: false,
-    })
-    sentEmails: SentEmailsClass[];
-}
+    @Column()
+    emailConfirmationCode: string;
 
-export const UserAccountEmailSchema = SchemaFactory.createForClass(UserAccountEmailClass);
+    @Column()
+    emailExpirationDate: Date;
 
-@Schema({ versionKey: false, _id: false })
-export class UserDevicesDataClass {
-    @Prop({
-        required: true,
-    })
-    ip: string;
-    @Prop({
-        required: true,
-    })
+    @Column()
+    emailRecoveryCode: string;
+
+    @Column()
+    emailRecoveryExpirationDate: Date;
+
+    @Column()
+    isBanned: boolean;
+
+    @Column()
+    banDate: Date;
+
+    @Column()
+    banReason: string;
+
+    @Column()
     lastActiveDate: Date;
-    @Prop({
-        required: true,
-    })
+
+    @Column()
     deviceId: string;
-    @Prop({
-        required: true,
-    })
+
+    @Column()
+    ip: string;
+
+    @Column()
     title: string;
 }
 
-export const UserDevicesDataSchema = SchemaFactory.createForClass(UserDevicesDataClass);
+@Entity()
+export class BannedBlogsClass {
+    @PrimaryGeneratedColumn()
+    id: number;
 
-@Schema({ versionKey: false, _id: false })
-export class BanInfoClass {
-    @Prop({
-        required: true,
-    })
+    @Column()
+    userId: number;
+
+    @Column()
+    blogId: number;
+
+    @Column()
     isBanned: boolean;
-    @Prop()
+
+    @Column()
     banDate: Date;
-    @Prop()
+
+    @Column()
     banReason: string;
 }
 
-export const BanInfoSchema = SchemaFactory.createForClass(BanInfoClass);
+@Entity()
+export class DevicesClass {
+    @PrimaryGeneratedColumn()
+    id: number;
 
-@Schema({ versionKey: false, _id: false })
-export class ExtendedBanInfoClass extends BanInfoClass {
-    @Prop({
-        required: true,
-    })
-    blogId: string;
+    @Column()
+    userId: number;
+
+    @Column()
+    ip: string;
+
+    @Column()
+    lastActiveDate: Date;
+
+    @Column()
+    deviceId: string;
+
+    @Column()
+    title: string;
 }
 
-export const ExtendedBanInfoSchema = SchemaFactory.createForClass(ExtendedBanInfoClass);
+@Entity()
+export class LoginAttemptsClass {
+    @PrimaryGeneratedColumn()
+    id: number;
 
-@Schema({ versionKey: false })
-export class UserAccountClass {
-    @Prop({
-        required: true,
-    })
-    id: string;
-    @Prop({
-        required: true,
-    })
-    login: string;
-    @Prop({
-        required: true,
-    })
-    email: string;
-    @Prop({
-        required: true,
-    })
-    passwordHash: string;
-    @Prop({
-        required: true,
-    })
-    createdAt: Date;
-    @Prop({
-        type: EmailRecoveryCodeSchema,
-        required: true,
-        _id: false,
-    })
-    emailRecoveryCode: EmailRecoveryCodeClass;
-    @Prop({
-        required: true,
-        _id: false,
-        default: [],
-    })
-    loginAttempts: LoginAttemptsClass[];
-    @Prop({
-        type: UserAccountEmailSchema,
-        required: true,
-        _id: false,
-    })
-    emailConfirmation: UserAccountEmailClass;
-    @Prop({
-        type: [UserDevicesDataSchema],
-        required: true,
-        _id: false,
-    })
-    userDevicesData: UserDevicesDataClass[];
-    @Prop({
-        type: UserDevicesDataSchema,
-        required: true,
-    })
-    currentSession: UserDevicesDataClass;
-    @Prop({
-        type: BanInfoSchema,
-        required: true,
-    })
-    // if banned by sa
-    banInfo: BanInfoClass;
-    @Prop({
-        type: [ExtendedBanInfoSchema],
-        required: true,
-        _id: false,
-    })
-    // if banned by bloggers
-    banInfoForBlogs: ExtendedBanInfoClass;
+    @Column()
+    userId: number;
+
+    @Column()
+    attemptDate: Date;
+
+    @Column()
+    ip: string;
 }
-
-export const UsersAccountSchema = SchemaFactory.createForClass(UserAccountClass);

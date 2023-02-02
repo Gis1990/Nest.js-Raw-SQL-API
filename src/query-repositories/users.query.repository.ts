@@ -1,112 +1,193 @@
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
-import { UserAccountClass } from "../schemas/users.schema";
-import { QueryDto } from "../dtos/blogs.dto";
-import { UsersClassPaginationDto } from "../dtos/users.dto";
+import { UsersClass } from "../schemas/users.schema";
+import {
+    ModelForGettingAllBannedUsersForBlog,
+    ModelForGettingAllUsers,
+    UserModelClass,
+    UsersClassPaginationDto,
+} from "../dtos/users.dto";
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
 
 @Injectable()
 export class UsersQueryRepository {
-    constructor(@InjectModel(UserAccountClass.name) private userAccountClass: Model<UserAccountClass>) {}
+    constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-    async getAllUsers(queryForUsers: QueryDto): Promise<UsersClassPaginationDto> {
-        const cursor = await this.userAccountClass
-            .find(queryForUsers.query, { _id: 0, id: 1, login: 1, email: 1, createdAt: 1, banInfo: 1 })
-            .sort(queryForUsers.sortObj)
-            .skip(queryForUsers.skips)
-            .limit(queryForUsers.pageSize);
+    async getAllUsers(dto: ModelForGettingAllUsers): Promise<UsersClassPaginationDto> {
+        const {
+            banStatus = "all",
+            searchLoginTerm = null,
+            searchEmailTerm = null,
+            pageNumber = 1,
+            pageSize = 10,
+            sortBy = "createdAt",
+            sortDirection = "desc",
+        } = dto;
+        const sort = sortDirection === "desc" ? ` DESC` : ` ASC`;
+        const offset = pageSize * (pageNumber - 1);
+        const queryParams: any = [pageSize, offset];
+        const queryParamsForCount = [];
+        let whereClause = "";
+        let whereClauseForCount = "";
+        if (searchLoginTerm) {
+            whereClause += `WHERE login LIKE $1 ORDER BY "${sortBy}" ${sort} LIMIT $2 OFFSET $3`;
+            whereClauseForCount += `WHERE login LIKE $1`;
+            queryParams.unshift(`%${searchLoginTerm}%`);
+            queryParamsForCount.unshift(`%${searchLoginTerm}%`);
+        }
+        if (searchEmailTerm) {
+            if (whereClause === "") {
+                whereClause += `WHERE email LIKE $1 ORDER BY "${sortBy}" ${sort} LIMIT $2 OFFSET $3`;
+                whereClauseForCount += `WHERE email LIKE $1`;
+                queryParams.unshift(`%${searchLoginTerm}%`);
+                queryParamsForCount.unshift(`%${searchLoginTerm}%`);
+            } else {
+                whereClause = `WHERE login LIKE $1 AND email LIKE $2 ORDER BY "${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
+                whereClauseForCount = `WHERE login LIKE $1 AND email LIKE $2`;
+                queryParams.splice(1, 0, `%${searchEmailTerm}%`);
+                queryParamsForCount.splice(1, 0, `%${searchEmailTerm}%`);
+            }
+        } else {
+            if (whereClause === "") {
+                whereClause += `ORDER BY "${sortBy}" ${sort} LIMIT $1 OFFSET $2`;
+            }
+        }
 
-        const totalCount = await this.userAccountClass.count(queryForUsers.query);
-
+        const query = `SELECT id,login,email,"createdAt","isBanned","banDate","banReason" FROM users  
+        ${whereClause}  ${
+            banStatus === "banned" ? "AND isBanned = true" : banStatus === "notBanned" ? "AND isBanned = false" : ""
+        } `;
+        const queryForCount = `SELECT COUNT(*) FROM users          
+         ${whereClauseForCount}  ${
+            banStatus === "banned" ? "AND isBanned = true" : banStatus === "notBanned" ? "AND isBanned = false" : ""
+        }`;
+        const cursor = await this.dataSource.query(query, queryParams);
+        const totalCount = await this.dataSource.query(queryForCount, queryParamsForCount);
         return {
-            pagesCount: Math.ceil(totalCount / queryForUsers.pageSize),
-            page: queryForUsers.pageNumber,
-            pageSize: queryForUsers.pageSize,
-            totalCount: totalCount,
+            pagesCount: Math.ceil(Number(totalCount[0].count) / pageSize),
+            page: pageNumber,
+            pageSize: pageSize,
+            totalCount: Number(totalCount[0].count),
             items: cursor,
         };
     }
 
     async GetAllBannedUsersForBlog(
-        queryAllBannedUsersForBlog: QueryDto,
-        blogId: string,
+        dto: ModelForGettingAllBannedUsersForBlog,
+        blogId: number,
     ): Promise<UsersClassPaginationDto> {
-        const cursor = await this.userAccountClass
-            .find(
-                { $and: [queryAllBannedUsersForBlog.query, { "banInfoForBlogs.blogId": blogId }] },
-                {
-                    _id: 0,
-                },
-            )
-            .sort(queryAllBannedUsersForBlog.sortObj)
-            .skip(queryAllBannedUsersForBlog.skips)
-            .limit(queryAllBannedUsersForBlog.pageSize);
-
-        const totalCount = await this.userAccountClass.count({
-            $and: [queryAllBannedUsersForBlog.query, { "banInfoForBlogs.blogId": blogId }],
-        });
+        const {
+            searchLoginTerm = null,
+            pageNumber = 1,
+            pageSize = 10,
+            sortBy = "createdAt",
+            sortDirection = "desc",
+        } = dto;
+        const sort = sortDirection === "desc" ? `DESC` : `ASC`;
+        const offset = pageSize * (pageNumber - 1);
+        const queryParamsForBannedUsers: any = [blogId, true, pageSize, offset];
+        const queryParamsForCountForBannedUsers: any = [blogId, true];
+        let whereClause = "";
+        let whereClauseForCount = "";
+        if (searchLoginTerm) {
+            whereClause += `AND login LIKE $3 ORDER BY "${sortBy}" ${sort} LIMIT $4 OFFSET $5`;
+            whereClauseForCount += `AND login LIKE $3`;
+            queryParamsForBannedUsers.splice(2, 0, `%${searchLoginTerm}%`);
+            queryParamsForCountForBannedUsers.push(`%${searchLoginTerm}%`);
+        } else {
+            whereClause += ` ORDER BY "${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
+        }
+        const query = `SELECT u.id,u.login,bb."isBanned",bb."banDate",bb."banReason" FROM users u JOIN "bannedBlogs" bb ON u.id = bb."userId" WHERE bb."blogId" = $1 AND bb."isBanned" = $2 
+        ${whereClause}`;
+        const cursor = await this.dataSource.query(query, queryParamsForBannedUsers);
+        const totalCount = await this.dataSource.query(
+            `SELECT COUNT(*) FROM users u JOIN "bannedBlogs" bb ON u.id = bb."userId" WHERE bb."blogId" = $1 AND bb."isBanned" = $2 ${whereClauseForCount}`,
+            queryParamsForCountForBannedUsers,
+        );
         return {
-            pagesCount: Math.ceil(totalCount / queryAllBannedUsersForBlog.pageSize),
-            page: queryAllBannedUsersForBlog.pageNumber,
-            pageSize: queryAllBannedUsersForBlog.pageSize,
-            totalCount: totalCount,
+            pagesCount: Math.ceil(Number(totalCount[0].count) / pageSize),
+            page: pageNumber,
+            pageSize: pageSize,
+            totalCount: Number(totalCount[0].count),
             items: cursor,
         };
     }
 
-    async getAllBannedUsersBySuperAdmin(): Promise<UserAccountClass[]> {
-        return this.userAccountClass.find({ "banInfo.isBanned": true }, { id: 1 });
-    }
-
-    async getUserById(id: string): Promise<UserAccountClass | null> {
-        const user = await this.userAccountClass.findOne(
-            { id: id },
-            {
-                _id: 0,
-                id: 1,
-                login: 1,
-                email: 1,
-                userDevicesData: 1,
-                currentSession: 1,
-                banInfo: 1,
-                banInfoForBlogs: 1,
-            },
+    async getUserById(id: number): Promise<UserModelClass | null> {
+        const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [id]);
+        const devices = await this.dataSource.query(
+            `SELECT ip,"lastActiveDate", "deviceId",title FROM devices WHERE "userId" = $1 `,
+            [id],
         );
-        if (user) {
-            return user;
-        } else {
+        const bannedBlogs = await this.dataSource.query(`SELECT * FROM "bannedBlogs" WHERE "userId" = $1 `, [id]);
+        if (!user[0]) {
             return null;
         }
+        const correctUser = {
+            id: user[0].id,
+            login: user[0].login,
+            email: user[0].email,
+            userDevicesData: devices,
+            currentSession: {
+                ip: user[0].ip,
+                lastActiveDate: user[0].lastActiveDate,
+                deviceId: user[0].deviceId,
+                title: user[0].title,
+            },
+            banInfo: {
+                isBanned: user[0].isBanned,
+                banDate: user[0].banDate,
+                banReason: user[0].banReason,
+            },
+            banInfoForBlogs: bannedBlogs,
+        };
+        return correctUser;
     }
 
-    async getUserByDeviceId(deviceId: string): Promise<UserAccountClass | null> {
-        const user = await this.userAccountClass.findOne(
-            { userDevicesData: { $elemMatch: { deviceId: deviceId } } },
-            {
-                _id: 0,
-                id: 1,
-                login: 1,
-                email: 1,
-                userDevicesData: 1,
-                currentSession: 1,
-            },
-        );
-        if (user) {
-            return user;
-        } else {
+    async getUserByDeviceId(deviceId: string): Promise<UserModelClass | null> {
+        const devices = await this.dataSource.query(`SELECT * FROM devices WHERE "deviceId" = $1 `, [deviceId]);
+        const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [devices[0].userId]);
+        if (!user[0]) {
             return null;
         }
+        const correctUser = {
+            id: user[0].id,
+            login: user[0].login,
+            email: user[0].email,
+            userDevicesData: devices,
+            currentSession: {
+                ip: user[0].ip,
+                lastActiveDate: user[0].lastActiveDate,
+                deviceId: user[0].deviceId,
+                title: user[0].title,
+            },
+            banInfo: {
+                isBanned: user[0].isBanned,
+                banDate: user[0].banDate,
+                banReason: user[0].banReason,
+            },
+        };
+        return correctUser || null;
     }
 
-    async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserAccountClass | null> {
-        return this.userAccountClass.findOne({ $or: [{ email: loginOrEmail }, { login: loginOrEmail }] });
+    async getUserByLoginOrEmail(loginOrEmail: string): Promise<UsersClass | null> {
+        const result = await this.dataSource.query(`SELECT * FROM users WHERE login = $1 OR email = $1`, [
+            loginOrEmail,
+        ]);
+        return result[0] || null;
     }
 
-    async getUserByConfirmationCode(emailConfirmationCode: string): Promise<UserAccountClass | null> {
-        return this.userAccountClass.findOne({ "emailConfirmation.confirmationCode": emailConfirmationCode });
+    async getUserByConfirmationCode(emailConfirmationCode: string): Promise<UsersClass | null> {
+        const result = await this.dataSource.query(`SELECT * FROM users WHERE "emailConfirmationCode"=$1`, [
+            emailConfirmationCode,
+        ]);
+        return result[0] || null;
     }
 
-    async getUserByRecoveryCode(recoveryCode: string): Promise<UserAccountClass | null> {
-        return this.userAccountClass.findOne({ "emailRecoveryCode.recoveryCode": recoveryCode });
+    async getUserByRecoveryCode(recoveryCode: string): Promise<UsersClass | null> {
+        const result = await this.dataSource.query(`SELECT * FROM users WHERE "emailRecoveryCode" = $1`, [
+            recoveryCode,
+        ]);
+        return result[0] || null;
     }
 }

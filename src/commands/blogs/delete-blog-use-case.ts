@@ -14,7 +14,7 @@ export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
 
     async execute(command: DeleteBlogCommand): Promise<boolean> {
         const blog = await this.queryBus.execute(new GetBlogByIdCommand(command.id));
-        if (blog.blogOwnerInfo.userId !== command.user.id) throw new HttpException("Access denied", 403);
-        return this.blogsRepository.deleteBlogById(command.id);
+        if (blog.blogOwnerUserId !== command.user.id) throw new HttpException("Access denied", 403);
+        return this.blogsRepository.deleteBlogById(Number(command.id));
     }
 }

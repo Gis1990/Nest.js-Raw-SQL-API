@@ -1,4 +1,4 @@
-import { ExtendedLikesInfoClass } from "../schemas/posts.schema";
+import { ExtendedLikesInfoClass } from "../dtos/posts.dto";
 
 export class PostViewModelClassPagination {
     constructor(

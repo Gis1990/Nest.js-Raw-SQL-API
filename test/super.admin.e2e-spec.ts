@@ -2,7 +2,6 @@ import "reflect-metadata";
 import * as request from "supertest";
 import {
     app,
-    CheckingDbEmptiness,
     createBlogForTests,
     createUserForTesting,
     CreatingUsersForTesting,
@@ -13,7 +12,7 @@ import {
 describe("super admin endpoint users /sa/users (e2e)", () => {
     beforeAll(async () => {
         await setupTestApp();
-        await CheckingDbEmptiness();
+        await request(app.getHttpServer()).delete("/testing/all-data").expect(204);
     });
     afterAll(async () => {
         await teardownTestApp();
@@ -155,7 +154,7 @@ describe("super admin endpoint users /sa/users (e2e)", () => {
         });
         it("should return status 404 ", async () => {
             await request(app.getHttpServer())
-                .get(`/sa/users/${userId}`)
+                .delete(`/sa/users/${userId}`)
                 .set("authorization", "Basic YWRtaW46cXdlcnR5")
                 .expect(404);
         });
@@ -167,7 +166,7 @@ describe("super admin endpoint blogs /sa/blogs (e2e)", () => {
     const items = [];
     beforeAll(async () => {
         await setupTestApp();
-        await CheckingDbEmptiness();
+        await request(app.getHttpServer()).delete("/testing/all-data").expect(204);
         const result = await CreatingUsersForTesting();
         accessToken = result.accessTokenForUser1;
     });
@@ -205,7 +204,7 @@ describe("super admin endpoint blogs /sa/blogs (e2e)", () => {
                 createdAt: expect.any(String),
             });
             items.push(response2.body);
-            const response3 = await request(app.getHttpServer()).get("/blogs").send(correctBlog2).expect(200);
+            const response3 = await request(app.getHttpServer()).get("/blogs").expect(200);
             expect(response3.body).toStrictEqual({
                 pagesCount: 1,
                 page: 1,

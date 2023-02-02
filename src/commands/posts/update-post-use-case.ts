@@ -21,13 +21,13 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
 
     async execute(command: UpdatePostCommand): Promise<boolean> {
         const blog = await this.queryBus.execute(new GetBlogByIdCommand(command.blogId));
-        if (blog.blogOwnerInfo.userId !== command.user.id) throw new HttpException("Access denied", 403);
+        if (blog.blogOwnerUserId !== command.user.id) throw new HttpException("Access denied", 403);
         return this.postsRepository.updatePost(
-            command.postId,
+            Number(command.postId),
             command.title,
             command.shortDescription,
             command.content,
-            command.blogId,
+            Number(command.blogId),
         );
     }
 }

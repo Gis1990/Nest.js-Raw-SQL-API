@@ -4,12 +4,13 @@ import { BlogClassPaginationDto } from "../dtos/blogs.dto";
 
 export class BlogsFactory {
     static async createBlogViewModelClass(blog: BlogClass): Promise<BlogViewModelClass> {
-        return new BlogViewModelClass(blog.id, blog.name, blog.description, blog.websiteUrl, blog.createdAt);
+        return new BlogViewModelClass(blog.id.toString(), blog.name, blog.description, blog.websiteUrl, blog.createdAt);
     }
 
     static async createBlogViewModelPaginationClass(
         dto: BlogClassPaginationDto,
     ): Promise<BlogViewModelClassPagination> {
+        dto.items.forEach((elem) => (elem.id = elem.id.toString()));
         return new BlogViewModelClassPagination(dto.pagesCount, dto.page, dto.pageSize, dto.totalCount, dto.items);
     }
 }

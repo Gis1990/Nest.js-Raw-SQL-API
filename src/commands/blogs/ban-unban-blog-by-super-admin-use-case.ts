@@ -16,6 +16,6 @@ export class BanUnbanBlogBySuperAdminUseCase implements ICommandHandler<BanUnban
         } else {
             dtoForBanUnbanBlogBySuperAdmin = { isBanned: command.isBanned, banDate: null };
         }
-        return this.blogsRepository.banUnbanBlogBySuperAdmin(dtoForBanUnbanBlogBySuperAdmin, command.blogId);
+        return this.blogsRepository.banUnbanBlogBySuperAdmin(dtoForBanUnbanBlogBySuperAdmin, Number(command.blogId));
     }
 }

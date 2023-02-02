@@ -1,18 +1,28 @@
-import { PostClass } from "../schemas/posts.schema";
+import { PostsClass } from "../schemas/posts.schema";
 import { PostViewModelClass, PostViewModelClassPagination } from "../entities/posts.entity";
 import { PostClassPaginationDto } from "../dtos/posts.dto";
 
 export class PostsFactory {
-    static async createPostViewModelClass(post: PostClass): Promise<PostViewModelClass> {
+    static async createPostViewModelClass(post: PostsClass): Promise<PostViewModelClass> {
+        const correctLikes = [];
+        if (post.lastLikes) {
+            correctLikes.push(...post.lastLikes.slice(0, 3));
+            correctLikes.map(({ id, ...rest }) => rest);
+        }
         return new PostViewModelClass(
-            post.id,
+            post.id.toString(),
             post.title,
             post.shortDescription,
             post.content,
-            post.blogId,
+            post.blogId.toString(),
             post.blogName,
             post.createdAt,
-            post.extendedLikesInfo,
+            {
+                likesCount: Number(post.likesCount),
+                dislikesCount: Number(post.dislikesCount),
+                myStatus: post.myStatus,
+                newestLikes: correctLikes,
+            },
         );
     }
 

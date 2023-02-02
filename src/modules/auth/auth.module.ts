@@ -11,24 +11,8 @@ import { UsersRepository } from "../../repositories/users.repository";
 import { BcryptService } from "../utils/bcrypt/bcrypt.service";
 import { BcryptModule } from "../utils/bcrypt/bcrypt.module";
 import { JwtRefreshTokenStrategy } from "../../guards/strategies/jwt.refresh.token.strategy";
-import { UsersQueryRepository } from "../../query-repositories/users.query.repository";
 import { strategyForUnauthorizedUser } from "../../guards/strategies/strategy.for.unauthorized.user";
 import { IsEmailExistOrConfirmedConstraint } from "../../decorators/users/users.custom.decorators";
-import { MongooseModule } from "@nestjs/mongoose";
-import {
-    LoginAttemptsClass,
-    LoginAttemptsSchema,
-    UserAccountClass,
-    UserAccountEmailClass,
-    UserAccountEmailSchema,
-    UserDevicesDataClass,
-    UserDevicesDataSchema,
-    EmailRecoveryCodeClass,
-    EmailRecoveryCodeSchema,
-    UsersAccountSchema,
-    BanInfoClass,
-    BanInfoSchema,
-} from "../../schemas/users.schema";
 import { AcceptNewPasswordUseCase } from "../../commands/auth/accept-new-password-use-case";
 import { CheckCredentialsUseCase } from "../../commands/auth/check-credentials-use-case";
 import { ConfirmEmailUseCase } from "../../commands/auth/confirm-email-use-case";
@@ -47,6 +31,7 @@ import { GetUserByIdQuery } from "../../queries/users/get-user-by-id-query";
 import { GetUserByRecoveryCodeQuery } from "../../queries/users/get-user-by-recovery-code-query";
 import { GetUserByConfirmationCodeQuery } from "../../queries/users/get-user-by-confirmation-code-query";
 import { GetUserByLoginOrEmailQuery } from "../../queries/users/get-user-by-login-or-email-query";
+import { UsersQueryRepository } from "../../query-repositories/users.query.repository";
 
 const useCases = [
     AcceptNewPasswordUseCase,
@@ -87,38 +72,6 @@ const queries = [
         ...useCases,
         ...queries,
     ],
-    imports: [
-        CqrsModule,
-        PassportModule,
-        JwtModule.register({}),
-        MailModule,
-        BcryptModule,
-        MongooseModule.forFeature([
-            {
-                name: UserAccountClass.name,
-                schema: UsersAccountSchema,
-            },
-            {
-                name: UserAccountEmailClass.name,
-                schema: UserAccountEmailSchema,
-            },
-            {
-                name: UserDevicesDataClass.name,
-                schema: UserDevicesDataSchema,
-            },
-            {
-                name: EmailRecoveryCodeClass.name,
-                schema: EmailRecoveryCodeSchema,
-            },
-            {
-                name: LoginAttemptsClass.name,
-                schema: LoginAttemptsSchema,
-            },
-            {
-                name: BanInfoClass.name,
-                schema: BanInfoSchema,
-            },
-        ]),
-    ],
+    imports: [CqrsModule, PassportModule, JwtModule.register({}), MailModule, BcryptModule],
 })
 export class AuthModule {}

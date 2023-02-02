@@ -23,16 +23,16 @@ import { CurrentUserModel } from "../../dtos/auth.dto";
 import { GetAllBlogsForAuthorizedUserCommand } from "../../queries/blogs/get-all-blogs-for-authorized-user-query";
 import { ValidateBlogId, ValidatePostId } from "../../decorators/blogger/blogger.custom.decorators";
 import { ModelForGettingAllComments } from "../../dtos/comments.dto";
-import { GetAllCommentsForAllPostsForBloggersBlogsCommand } from "../../queries/comments/get-all-comments-for-all-posts-for-blogs-query";
 import {
     InputModelForBanUnbanUserByBloggerForBlog,
     ModelForGettingAllBannedUsersForBlog,
     UsersIdValidationModel,
 } from "../../dtos/users.dto";
 import { UserViewModelForBannedUsersByBloggerPaginationClass } from "../../entities/users.entity";
-import { GetAllBannedUsersForBlogCommand } from "../../queries/users/get-all-banned-users-for-blog-query";
 import { BanUnbanUserByBloggerForBlogCommand } from "../../commands/users/ban-unban-user-by-blogger-for-blog-use-case";
 import { CommentViewModelForBloggerPaginationClass } from "../../entities/comments.entity";
+import { GetAllBannedUsersForBlogCommand } from "../../queries/users/get-all-banned-users-for-blog-query";
+import { GetAllCommentsForAllPostsForBloggersBlogsCommand } from "../../queries/comments/get-all-comments-for-all-posts-for-blogs-query";
 
 @SkipThrottle()
 @Controller("blogger")

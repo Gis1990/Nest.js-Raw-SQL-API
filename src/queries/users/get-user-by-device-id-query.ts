@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { UserAccountClass } from "../../schemas/users.schema";
 import { UsersQueryRepository } from "../../query-repositories/users.query.repository";
+import { UserModelClass } from "../../dtos/users.dto";
 
 export class GetUserByDeviceIdCommand {
     constructor(public readonly deviceId: string) {}
@@ -10,7 +10,7 @@ export class GetUserByDeviceIdCommand {
 export class GetUserByDeviceIdQuery implements IQueryHandler<GetUserByDeviceIdCommand> {
     constructor(private usersQueryRepository: UsersQueryRepository) {}
 
-    async execute(query: GetUserByDeviceIdCommand): Promise<UserAccountClass | null> {
+    async execute(query: GetUserByDeviceIdCommand): Promise<UserModelClass | null> {
         return await this.usersQueryRepository.getUserByDeviceId(query.deviceId);
     }
 }

@@ -11,6 +11,6 @@ export class GetBlogByIdForBanUnbanOperationQuery implements IQueryHandler<GetBl
     constructor(private blogsQueryRepository: BlogsQueryRepository) {}
 
     async execute(query: GetBlogByIdForBanUnbanOperationCommand): Promise<BlogClass | null> {
-        return await this.blogsQueryRepository.getBlogByIdForBanUnbanOperation(query.id);
+        return await this.blogsQueryRepository.getBlogByIdForBanUnbanOperation(Number(query.id));
     }
 }

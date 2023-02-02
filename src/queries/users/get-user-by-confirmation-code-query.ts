@@ -1,5 +1,5 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { UserAccountClass } from "../../schemas/users.schema";
+import { UsersClass } from "../../schemas/users.schema";
 import { UsersQueryRepository } from "../../query-repositories/users.query.repository";
 
 export class GetUserByConfirmationCodeCommand {
@@ -10,7 +10,7 @@ export class GetUserByConfirmationCodeCommand {
 export class GetUserByConfirmationCodeQuery implements IQueryHandler<GetUserByConfirmationCodeCommand> {
     constructor(private usersQueryRepository: UsersQueryRepository) {}
 
-    async execute(query: GetUserByConfirmationCodeCommand): Promise<UserAccountClass | null> {
+    async execute(query: GetUserByConfirmationCodeCommand): Promise<UsersClass | null> {
         return await this.usersQueryRepository.getUserByConfirmationCode(query.confirmationCode);
     }
 }

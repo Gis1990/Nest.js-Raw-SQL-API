@@ -19,7 +19,7 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
 
     async execute(command: UpdateBlogCommand): Promise<boolean> {
         const blog = await this.queryBus.execute(new GetBlogByIdCommand(command.id));
-        if (blog.blogOwnerInfo.userId !== command.user.id) throw new HttpException("Access denied", 403);
-        return this.blogsRepository.updateBlog(command.id, command.dto);
+        if (blog.blogOwnerUserId !== command.user.id) throw new HttpException("Access denied", 403);
+        return this.blogsRepository.updateBlog(Number(command.id), command.dto);
     }
 }

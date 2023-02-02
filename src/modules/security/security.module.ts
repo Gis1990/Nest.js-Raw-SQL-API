@@ -4,13 +4,6 @@ import { SecurityController } from "./security.controller";
 import { UsersQueryRepository } from "../../query-repositories/users.query.repository";
 import { UsersRepository } from "../../repositories/users.repository";
 import { IsDeviceIdExistConstraint } from "../../decorators/security/security.devices.custom.decorators";
-import { MongooseModule } from "@nestjs/mongoose";
-import {
-    LoginAttemptsClass,
-    LoginAttemptsSchema,
-    UserAccountClass,
-    UsersAccountSchema,
-} from "../../schemas/users.schema";
 import { CheckAccessRightsUseCase } from "../../commands/security/check-access-rights-use-case";
 import { TerminateAllDevicesUseCase } from "../../commands/security/terminate-all-devices-use-case";
 import { ReturnAllDevicesUseCase } from "../../commands/security/return-all-devices-use-case";
@@ -31,18 +24,6 @@ const queries = [GetUserByIdQuery, GetUserByDeviceIdQuery];
         ...useCases,
         ...queries,
     ],
-    imports: [
-        CqrsModule,
-        MongooseModule.forFeature([
-            {
-                name: UserAccountClass.name,
-                schema: UsersAccountSchema,
-            },
-            {
-                name: LoginAttemptsClass.name,
-                schema: LoginAttemptsSchema,
-            },
-        ]),
-    ],
+    imports: [CqrsModule],
 })
 export class SecurityModule {}

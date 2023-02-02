@@ -8,10 +8,10 @@ import { SkipThrottle } from "@nestjs/throttler";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { GetAllBlogsCommand } from "../../queries/blogs/get-all-blogs-query";
 import { GetBlogByIdWithCorrectViewModelCommand } from "../../queries/blogs/get-blog-by-id-with-correct-view-model-query";
-import { GetAllPostsForSpecificBlogCommand } from "../../queries/posts/get-all-posts-for-specific-blog-query";
 import { JwtAccessTokenAuthGuard } from "../../guards/jwtAccessToken-auth.guard";
 import { CurrentUserModel } from "../../dtos/auth.dto";
 import { CreateBlogCommand } from "../../commands/blogs/create-blog-use-case";
+import { GetAllPostsForSpecificBlogCommand } from "../../queries/posts/get-all-posts-for-specific-blog-query";
 
 @SkipThrottle()
 @Controller("blogs")

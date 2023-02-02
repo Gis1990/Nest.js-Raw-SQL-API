@@ -1,9 +1,8 @@
 import { IsBlogsIdExistInTheRequestBody } from "../decorators/blogs/blogs.custom.decorators";
 import { IsString, Length, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
-import { IsPostIdExist } from "../decorators/posts/posts.custom.decorators";
 import { Transform, TransformFnParams, Type } from "class-transformer";
-import { PostClass, UsersLikesInfoClass } from "../schemas/posts.schema";
-import { LikesInfoClass } from "../schemas/comments.schema";
+import { IsPostIdExist } from "../decorators/posts/posts.custom.decorators";
+import { PostsClass } from "../schemas/posts.schema";
 
 export class ModelForGettingAllPosts {
     @IsNumber()
@@ -72,15 +71,12 @@ export class PostsIdValidationModel {
 }
 
 export class CreatedPostDto {
-    public id: string;
     public title: string;
     public shortDescription: string;
     public content: string;
-    public blogId: string;
-    public blogName: string;
     public createdAt: Date;
-    public extendedLikesInfo: LikesInfoClass;
-    public usersLikesInfo: UsersLikesInfoClass;
+    public blogId: number;
+    public postOwnerUserId: number;
 }
 
 export class PostClassPaginationDto {
@@ -88,5 +84,12 @@ export class PostClassPaginationDto {
     public page: number;
     public pageSize: number;
     public totalCount: number;
-    public items: PostClass[];
+    public items: PostsClass[];
+}
+
+export class ExtendedLikesInfoClass {
+    public likesCount: number;
+    public dislikesCount: number;
+    public myStatus: string;
+    public newestLikes: { addedAt: Date; userId: string; login: string }[];
 }

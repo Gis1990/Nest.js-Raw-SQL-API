@@ -14,9 +14,9 @@ export class ConfirmEmailUseCase implements ICommandHandler<ConfirmEmailCommand>
     async execute(command: ConfirmEmailCommand): Promise<boolean> {
         const user = await this.queryBus.execute(new GetUserByConfirmationCodeCommand(command.code));
         if (!user) throw new HttpException("Code is incorrect", 406);
-        if (user.emailConfirmation.isConfirmed) throw new HttpException("Code is incorrect", 406);
-        if (user.emailConfirmation.confirmationCode !== command.code) throw new HttpException("Code is incorrect", 406);
-        if (user.emailConfirmation.expirationDate < new Date()) throw new HttpException("Code is incorrect", 406);
+        if (user.emailConfirmed) throw new HttpException("Code is incorrect", 406);
+        if (user.emailConfirmationCode !== command.code) throw new HttpException("Code is incorrect", 406);
+        if (user.emailExpirationDate < new Date()) throw new HttpException("Code is incorrect", 406);
         return await this.usersRepository.userConfirmedEmail(user.id);
     }
 }

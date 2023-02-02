@@ -18,7 +18,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         const user = await this.commandBus.execute(
             new CheckCredentialsCommand(loginOrEmail, password, request.ip, request.headers["user-agent"]),
         );
-        if (user && !user.banInfo.isBanned) {
+        if (user && !user.isBanned) {
             return user;
         } else {
             throw new UnauthorizedException();

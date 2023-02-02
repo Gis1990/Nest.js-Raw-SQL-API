@@ -3,7 +3,7 @@ import { BlogsQueryRepository } from "../../query-repositories/blogs.query.repos
 import { BlogClass } from "../../schemas/blogs.schema";
 
 export class GetBlogByIdCommand {
-    constructor(public id: string) {}
+    constructor(public readonly id: string) {}
 }
 
 @QueryHandler(GetBlogByIdCommand)
@@ -11,6 +11,6 @@ export class GetBlogByIdQuery implements IQueryHandler<GetBlogByIdCommand> {
     constructor(private blogsQueryRepository: BlogsQueryRepository) {}
 
     async execute(query: GetBlogByIdCommand): Promise<BlogClass | null> {
-        return await this.blogsQueryRepository.getBlogById(query.id);
+        return await this.blogsQueryRepository.getBlogById(Number(query.id));
     }
 }

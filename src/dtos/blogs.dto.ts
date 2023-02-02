@@ -80,13 +80,12 @@ export class InputModelForUpdatingBlog {
 }
 
 export class CreatedBlogDto {
-    public id: string;
     public name: string;
     public description: string;
     public websiteUrl: string;
     public createdAt: Date;
     public blogOwnerInfo: {
-        userId: string;
+        userId: number;
         userLogin: string;
     };
     public banInfo: {
@@ -98,14 +97,6 @@ export class CreatedBlogDto {
 export class ForBanUnbanBlogBySuperAdminDto {
     public isBanned: boolean;
     public banDate: Date | null;
-}
-
-export class QueryDto {
-    public query: any;
-    public skips: number;
-    public sortObj: any;
-    public pageSize: any;
-    public pageNumber: any;
 }
 
 export class BlogClassPaginationDto {

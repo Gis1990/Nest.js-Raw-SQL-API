@@ -1,15 +1,19 @@
-import { UserAccountClass } from "../schemas/users.schema";
 import {
     UserViewModelClass,
     UserViewModelClassPagination,
     UserViewModelForBannedUsersByBloggerClass,
     UserViewModelForBannedUsersByBloggerPaginationClass,
 } from "../entities/users.entity";
+import { UsersClass } from "../schemas/users.schema";
 import { UsersClassPaginationDto } from "../dtos/users.dto";
 
 export class UsersFactory {
-    static async createUserViewModelClass(user: UserAccountClass): Promise<UserViewModelClass> {
-        return new UserViewModelClass(user.id, user.login, user.email, user.createdAt, user.banInfo);
+    static async createUserViewModelClass(user: UsersClass): Promise<UserViewModelClass> {
+        return new UserViewModelClass(user.id.toString(), user.login, user.email, user.createdAt, {
+            isBanned: user.isBanned,
+            banDate: user.banDate,
+            banReason: user.banReason,
+        });
     }
 
     static async createUserViewModelPaginationClass(
@@ -25,17 +29,15 @@ export class UsersFactory {
 
     static async createUserViewModelForBannedUsersByBloggerPaginationClass(
         dto: UsersClassPaginationDto,
-        blogId: string,
     ): Promise<UserViewModelForBannedUsersByBloggerPaginationClass> {
-        dto.items.filter((user) => user.banInfoForBlogs.blogId === blogId);
         const correctCursor = [];
         dto.items.forEach((user) => {
             const banData = {
-                isBanned: user.banInfoForBlogs[0].isBanned,
-                banDate: user.banInfoForBlogs[0].banDate,
-                banReason: user.banInfoForBlogs[0].banReason,
+                isBanned: user.isBanned,
+                banDate: user.banDate,
+                banReason: user.banReason,
             };
-            correctCursor.push(new UserViewModelForBannedUsersByBloggerClass(user.id, user.login, banData));
+            correctCursor.push(new UserViewModelForBannedUsersByBloggerClass(user.id.toString(), user.login, banData));
         });
         return new UserViewModelForBannedUsersByBloggerPaginationClass(
             dto.pagesCount,

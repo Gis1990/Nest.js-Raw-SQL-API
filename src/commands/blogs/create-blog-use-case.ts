@@ -15,10 +15,11 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
 
     async execute(command: CreateBlogCommand): Promise<BlogViewModelClass> {
         const createdBlogDto = {
-            ...command.dto,
-            id: Number(new Date()).toString(),
+            name: command.dto.name,
+            description: command.dto.description,
+            websiteUrl: command.dto.websiteUrl,
             createdAt: new Date(),
-            blogOwnerInfo: { userId: command.user.id, userLogin: command.user.login },
+            blogOwnerInfo: { userId: Number(command.user.id), userLogin: command.user.login },
             banInfo: { isBanned: false, banDate: null },
         };
         const createdBlog = await this.blogsRepository.createBlog(createdBlogDto);

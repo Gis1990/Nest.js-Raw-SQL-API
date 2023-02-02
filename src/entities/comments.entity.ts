@@ -1,5 +1,4 @@
-import { LikesInfoClass, PostInfoClass } from "../schemas/comments.schema";
-import { OwnerInfoClass } from "../schemas/blogs.schema";
+import { LikesInfoClass } from "../dtos/comments.dto";
 
 export class CommentViewModelPaginationClass {
     constructor(
@@ -25,8 +24,10 @@ export class CommentViewModelClass {
     constructor(
         public id: string,
         public content: string,
-        public userId: string,
-        public userLogin: string,
+        public commentatorInfo: {
+            userId: string;
+            userLogin: string;
+        },
         public createdAt: Date,
         public likesInfo: LikesInfoClass,
     ) {}
@@ -37,8 +38,15 @@ export class CommentViewModelForBloggerClass {
         public id: string,
         public content: string,
         public createdAt: Date,
-        public likesInfo: LikesInfoClass,
-        public commentatorInfo: OwnerInfoClass,
-        public postInfo: PostInfoClass,
+        public commentatorInfo: {
+            userId: string;
+            userLogin: string;
+        },
+        public postInfo: {
+            id: string;
+            title: string;
+            blogId: string;
+            blogName: string;
+        },
     ) {}
 }

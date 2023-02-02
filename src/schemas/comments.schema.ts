@@ -1,90 +1,40 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { UsersLikesInfoClass, UsersLikesInfoSchema } from "./posts.schema";
-import { OwnerInfoClass, OwnerInfoSchema } from "./blogs.schema";
+import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-@Schema({ versionKey: false })
-export class LikesInfoClass {
-    @Prop({
-        default: 0,
-        required: true,
-    })
+@Entity()
+export class CommentsClass {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    content: string;
+
+    @Column()
+    createdAt: Date;
+
+    @Column()
     likesCount: number;
-    @Prop({
-        default: 0,
-        required: true,
-    })
+
+    @Column()
     dislikesCount: number;
-    @Prop({
-        default: "None",
-        required: true,
-    })
+
+    @Column()
     myStatus: string;
-}
 
-export const LikesInfoSchema = SchemaFactory.createForClass(LikesInfoClass);
+    @Column()
+    commentOwnerUserId: number;
 
-@Schema({ versionKey: false })
-export class PostInfoClass {
-    @Prop({
-        required: true,
-    })
-    id: string;
-    @Prop({
-        required: true,
-    })
+    @Column()
+    commentOwnerUserLogin: string;
+
+    @Column()
+    postId: number;
+
+    @Column()
     title: string;
-    @Prop({
-        required: true,
-    })
-    blogId: string;
-    @Prop({
-        required: true,
-    })
+
+    @Column()
+    blogId: number;
+
+    @Column()
     blogName: string;
 }
-
-export const PostInfoSchema = SchemaFactory.createForClass(PostInfoClass);
-
-@Schema({ versionKey: false })
-export class CommentClass {
-    @Prop({
-        required: true,
-    })
-    id: string;
-    @Prop({
-        required: true,
-    })
-    content: string;
-    @Prop({
-        required: true,
-    })
-    createdAt: Date;
-    @Prop({
-        type: LikesInfoSchema,
-        required: true,
-        default: LikesInfoClass,
-        _id: false,
-    })
-    likesInfo: LikesInfoClass;
-    @Prop({
-        type: UsersLikesInfoSchema,
-        required: true,
-        default: UsersLikesInfoClass,
-        _id: false,
-    })
-    usersLikesInfo: UsersLikesInfoClass;
-    @Prop({
-        type: OwnerInfoSchema,
-        required: true,
-        _id: false,
-    })
-    commentatorInfo: OwnerInfoClass;
-    @Prop({
-        type: PostInfoSchema,
-        required: true,
-        _id: false,
-    })
-    postInfo: PostInfoClass;
-}
-
-export const CommentsSchema = SchemaFactory.createForClass(CommentClass);

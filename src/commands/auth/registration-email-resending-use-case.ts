@@ -22,7 +22,7 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
         const updatedUser = await this.queryBus.execute(new GetUserByLoginOrEmailCommand(command.dto.email));
         if (updatedUser) {
             await this.commandBus.execute(
-                new SendEmailForRegistrationCommand(command.dto.email, updatedUser.emailConfirmation.confirmationCode),
+                new SendEmailForRegistrationCommand(command.dto.email, updatedUser.emailConfirmationCode),
             );
             await this.usersRepository.addEmailLog(command.dto.email);
             return true;

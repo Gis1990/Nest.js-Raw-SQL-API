@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { UserAccountClass } from "../../schemas/users.schema";
 import { UsersQueryRepository } from "../../query-repositories/users.query.repository";
+import { UserModelClass } from "../../dtos/users.dto";
 
 export class GetUserByIdCommand {
     constructor(public readonly userId: string) {}
@@ -10,7 +10,7 @@ export class GetUserByIdCommand {
 export class GetUserByIdQuery implements IQueryHandler<GetUserByIdCommand> {
     constructor(private usersQueryRepository: UsersQueryRepository) {}
 
-    async execute(query: GetUserByIdCommand): Promise<UserAccountClass | null> {
-        return await this.usersQueryRepository.getUserById(query.userId);
+    async execute(query: GetUserByIdCommand): Promise<UserModelClass | null> {
+        return await this.usersQueryRepository.getUserById(Number(query.userId));
     }
 }

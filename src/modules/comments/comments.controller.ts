@@ -1,16 +1,16 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Put, UseGuards } from "@nestjs/common";
 import { JwtAccessTokenAuthGuard } from "../../guards/jwtAccessToken-auth.guard";
-import { CommentsIdValidationModel, ModelForLikeStatus, ModelForUpdatingComment } from "../../dtos/comments.dto";
 import { CurrentUser, CurrentUserId } from "../../decorators/auth/auth.custom.decorators";
 import { strategyForUnauthorizedUser } from "../../guards/strategy-for-unauthorized-user-guard";
 import { CurrentUserModel } from "../../dtos/auth.dto";
 import { SkipThrottle } from "@nestjs/throttler";
-import { LikeOperationForCommentCommand } from "../../commands/comments/like-operation-for-comment-use-case";
 import { CommentViewModelClass } from "../../entities/comments.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { CommentsIdValidationModel, ModelForLikeStatus, ModelForUpdatingComment } from "../../dtos/comments.dto";
 import { UpdateCommentCommand } from "../../commands/comments/update-comment-use-case";
-import { DeleteCommentCommand } from "../../commands/comments/delete-comment-use-case";
 import { GetCommentByIdCommand } from "../../queries/comments/get-comment-by-id-query";
+import { DeleteCommentCommand } from "../../commands/comments/delete-comment-use-case";
+import { LikeOperationForCommentCommand } from "../../commands/comments/like-operation-for-comment-use-case";
 
 @SkipThrottle()
 @Controller("comments")
@@ -52,6 +52,8 @@ export class CommentsController {
         @Body() body: ModelForLikeStatus,
         @CurrentUser() user: CurrentUserModel,
     ): Promise<boolean> {
-        return await this.commandBus.execute(new LikeOperationForCommentCommand(params.id, user.id, body.likeStatus));
+        return await this.commandBus.execute(
+            new LikeOperationForCommentCommand(params.id, user.id, user.login, body.likeStatus),
+        );
     }
 }

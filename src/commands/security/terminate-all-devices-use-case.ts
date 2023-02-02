@@ -12,7 +12,7 @@ export class TerminateAllDevicesUseCase implements ICommandHandler<TerminateAllD
 
     async execute(command: TerminateAllDevicesCommand): Promise<boolean> {
         return await this.usersRepository.terminateAllDevices(
-            command.userWithDeviceData.id,
+            Number(command.userWithDeviceData.id),
             command.userWithDeviceData.currentSession,
         );
     }

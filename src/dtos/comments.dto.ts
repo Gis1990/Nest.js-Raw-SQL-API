@@ -1,9 +1,7 @@
 import { IsString, Length, IsIn, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
-import { IsCommentsIdExist } from "../decorators/comments/comments.custom.decorators";
 import { Transform, TransformFnParams, Type } from "class-transformer";
-import { UsersLikesInfoClass } from "../schemas/posts.schema";
-import { CommentClass, LikesInfoClass, PostInfoClass } from "../schemas/comments.schema";
-import { OwnerInfoClass } from "../schemas/blogs.schema";
+import { IsCommentsIdExist } from "../decorators/comments/comments.custom.decorators";
+import { CommentsClass } from "../schemas/comments.schema";
 
 const listOfCorrectLikeStatus = ["Like", "Dislike", "None"];
 
@@ -54,13 +52,11 @@ export class ModelForCreatingNewComment {
 }
 
 export class CreatedCommentDto {
-    public id: string;
     public content: string;
     public createdAt: Date;
-    public likesInfo: LikesInfoClass;
-    public usersLikesInfo: UsersLikesInfoClass;
-    public commentatorInfo: OwnerInfoClass;
-    public postInfo: PostInfoClass;
+    public commentatorOwnerUserId: number;
+    public commentatorOwnerUserLogin: string;
+    public postId: number;
 }
 
 export class CommentClassPaginationDto {
@@ -68,5 +64,11 @@ export class CommentClassPaginationDto {
     public page: number;
     public pageSize: number;
     public totalCount: number;
-    public items: CommentClass[];
+    public items: CommentsClass[];
+}
+
+export class LikesInfoClass {
+    public likesCount: number;
+    public dislikesCount: number;
+    public myStatus: string;
 }

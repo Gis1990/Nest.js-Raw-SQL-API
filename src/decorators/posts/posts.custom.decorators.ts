@@ -15,7 +15,7 @@ export class IsPostIdExistConstraint implements ValidatorConstraintInterface {
     constructor(private queryBus: QueryBus) {}
 
     async validate(postId: string): Promise<boolean> {
-        const userId = undefined;
+        const userId = null;
         const post = await this.queryBus.execute(new GetPostByIdCommand(postId, userId));
         if (!post) {
             throw new HttpException("Post not found", 404);

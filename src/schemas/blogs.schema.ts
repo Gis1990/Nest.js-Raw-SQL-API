@@ -1,66 +1,31 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Schema({ versionKey: false })
-export class OwnerInfoClass {
-    @Prop({
-        required: true,
-    })
-    userId: string;
-    @Prop({
-        required: true,
-    })
-    userLogin: string;
-}
-
-export const OwnerInfoSchema = SchemaFactory.createForClass(OwnerInfoClass);
-
-@Schema({ versionKey: false })
-export class BanInfoClassForBlog {
-    @Prop({
-        required: true,
-    })
-    isBanned: boolean;
-    @Prop()
-    banDate: Date;
-}
-
-export const BanInfoSchemaForBlog = SchemaFactory.createForClass(BanInfoClassForBlog);
-
-@Schema({ versionKey: false })
+@Entity()
 export class BlogClass {
-    @Prop({
-        required: true,
-    })
+    @PrimaryGeneratedColumn()
     id: string;
-    @Prop({
-        required: true,
-    })
+
+    @Column()
     name: string;
-    @Prop({
-        required: true,
-    })
+
+    @Column()
     description: string;
-    @Prop({
-        required: true,
-    })
+
+    @Column()
     websiteUrl: string;
-    @Prop({
-        required: true,
-    })
+
+    @Column()
     createdAt: Date;
-    @Prop({
-        type: OwnerInfoSchema,
-        required: true,
-        _id: false,
-    })
-    blogOwnerInfo: OwnerInfoClass;
 
-    @Prop({
-        type: BanInfoSchemaForBlog,
-        required: true,
-        _id: false,
-    })
-    banInfo: BanInfoClassForBlog;
+    @Column()
+    isBanned: boolean;
+
+    @Column()
+    banDate: Date;
+
+    @Column()
+    blogOwnerUserId: string;
+
+    @Column()
+    blogOwnerLogin: string;
 }
-
-export const BlogsSchema = SchemaFactory.createForClass(BlogClass);

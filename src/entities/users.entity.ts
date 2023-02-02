@@ -1,4 +1,4 @@
-import { BanInfoClass } from "../schemas/users.schema";
+import { BanInfoClass } from "../dtos/users.dto";
 
 export class UserViewModelClassPagination {
     constructor(
