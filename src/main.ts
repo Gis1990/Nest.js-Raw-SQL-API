@@ -3,21 +3,9 @@ import { useContainer } from "class-validator";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import mongoose from "mongoose";
 import { BadRequestException, ValidationPipe } from "@nestjs/common";
 import { HttpExceptionFilter } from "./exception.filter";
 import cookieParser from "cookie-parser";
-
-export async function runDb(mongoUri: string) {
-    try {
-        mongoose.set("strictQuery", true);
-        await mongoose.connect(mongoUri);
-        console.log("Connected successfully to mongo server");
-    } catch {
-        console.log("Error connecting to mongo server");
-        await mongoose.disconnect();
-    }
-}
 
 export const validationPipeSettings = {
     transform: true,
@@ -44,9 +32,7 @@ async function bootstrap() {
     app.useGlobalFilters(new HttpExceptionFilter());
     app.use(cookieParser());
     useContainer(app.select(AppModule), { fallbackOnErrors: true });
-    const configService = app.get(ConfigService);
-    const mongoUri = configService.get("mongo_URI");
-    await runDb(mongoUri);
+    app.get(ConfigService);
     await app.listen(500);
 }
 
