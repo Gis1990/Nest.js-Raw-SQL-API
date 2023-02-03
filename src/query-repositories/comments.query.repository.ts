@@ -65,7 +65,7 @@ export class CommentsQueryRepository {
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY comments.id
-        ORDER BY posts."${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
+        ORDER BY posts."${sortBy}" COLLATE "C" ${sort} LIMIT $3 OFFSET $4`;
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
 
         const totalCount = await this.dataSource.query(
@@ -116,7 +116,7 @@ export class CommentsQueryRepository {
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY comments.id,posts.title,posts."blogId",blogs."name"
-        ORDER BY posts."${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
+        ORDER BY posts."${sortBy}" COLLATE "C" ${sort} LIMIT $3 OFFSET $4`;
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
 
         const totalCount = await this.dataSource.query(

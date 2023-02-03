@@ -25,12 +25,12 @@ export class BlogsQueryRepository {
         let whereClause = "";
         let whereClauseForCount = "";
         if (searchNameTerm) {
-            whereClause += `AND name ILIKE $1 ORDER BY "${sortBy}" ${sort} LIMIT $2 OFFSET $3`;
+            whereClause += `AND name ILIKE $1 ORDER BY "${sortBy}" COLLATE "C" ${sort} LIMIT $2 OFFSET $3`;
             queryParamsForAllBlogs.unshift(`%${searchNameTerm}%`);
             whereClauseForCount += `AND name ILIKE $1`;
             queryParamsForCountAllBlogs.push(`%${searchNameTerm}%`);
         } else {
-            whereClause += `ORDER BY "${sortBy}" ${sort} LIMIT $1 OFFSET $2`;
+            whereClause += `ORDER BY "${sortBy}" COLLATE "C" ${sort} LIMIT $1 OFFSET $2`;
         }
         const query = `SELECT id,name,description,"websiteUrl", "createdAt" FROM blogs WHERE "isBanned" = false ${whereClause}`;
         const cursor = await this.dataSource.query(query, queryParamsForAllBlogs);
@@ -63,12 +63,12 @@ export class BlogsQueryRepository {
         let whereClause = "";
         let whereClauseForCount = "";
         if (searchNameTerm) {
-            whereClause += `AND name ILIKE $2 ORDER BY "${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
+            whereClause += `AND name ILIKE $2 ORDER BY "${sortBy}" COLLATE "C" ${sort} LIMIT $3 OFFSET $4`;
             queryParamsForAllBlogsForAuthorizedUser.splice(1, 0, `%${searchNameTerm}%`);
             whereClauseForCount += `AND name ILIKE $2`;
             queryParamsForCountAllBlogsForAuthorizedUser.push(`%${searchNameTerm}%`);
         } else {
-            whereClause += `ORDER BY "${sortBy}" ${sort} LIMIT $2 OFFSET $3`;
+            whereClause += `ORDER BY "${sortBy}" COLLATE "C" ${sort} LIMIT $2 OFFSET $3`;
         }
         const query = `SELECT id,name,description,"websiteUrl", "createdAt" FROM blogs WHERE "isBanned" = false AND "blogOwnerUserId"=$1 ${whereClause}`;
         const cursor = await this.dataSource.query(query, queryParamsForAllBlogsForAuthorizedUser);
@@ -100,12 +100,12 @@ export class BlogsQueryRepository {
         let whereClause = "";
         let whereClauseForCount = "";
         if (searchNameTerm) {
-            whereClause += `WHERE name ILIKE $1 ORDER BY "${sortBy}" ${sort} LIMIT $2 OFFSET $3`;
+            whereClause += `WHERE name ILIKE $1 ORDER BY "${sortBy}" COLLATE "C" ${sort} LIMIT $2 OFFSET $3`;
             queryParamsForAllBlogsForSuperAdmin.unshift(`%${searchNameTerm}%`);
             whereClauseForCount += `WHERE name ILIKE $1`;
             queryParamsForCountAllBlogsForSuperAdmin.push(`%${searchNameTerm}%`);
         } else {
-            whereClause += `ORDER BY "${sortBy}" ${sort} LIMIT $1 OFFSET $2`;
+            whereClause += `ORDER BY "${sortBy}" COLLATE "C" ${sort} LIMIT $1 OFFSET $2`;
         }
         const query = `SELECT id,name,description,"websiteUrl", "createdAt" FROM blogs ${whereClause}`;
         const cursor = await this.dataSource.query(query, queryParamsForAllBlogsForSuperAdmin);
