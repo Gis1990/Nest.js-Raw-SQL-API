@@ -22,8 +22,8 @@ export class SendEmailForRegistrationUseCase implements ICommandHandler<SendEmai
         await transport.sendMail({
             from: "Anton Pavlovskiy",
             to: command.email,
-            subject: "Password recovery",
-            text: `https://somesite.com/password-recovery?recoveryCode=${command.confirmationCode}`,
+            subject: "Code for registration",
+            text: `https://somesite.com/registration?confirmationCode=${command.confirmationCode}`,
         });
         return true;
     }

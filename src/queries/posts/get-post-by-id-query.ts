@@ -21,7 +21,7 @@ export class GetPostByIdQuery implements IQueryHandler<GetPostByIdCommand> {
         if (!post) {
             return null;
         }
-        const blog = await this.blogsQueryRepository.getBlogById(Number(post.blogId));
+        const blog = await this.blogsQueryRepository.getBlogById(post.blogId);
         if (!blog || blog.isBanned) return null;
         return PostsFactory.createPostViewModelClass(post);
     }

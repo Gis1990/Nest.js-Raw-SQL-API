@@ -38,7 +38,7 @@ export class AuthController {
     }
 
     @SkipThrottle(false)
-    @Post("new-Password")
+    @Post("new-password")
     @HttpCode(204)
     async newPassword(@Body() dto: InputModelForNewPassword): Promise<boolean> {
         return await this.commandBus.execute(new AcceptNewPasswordCommand(dto));
@@ -54,7 +54,7 @@ export class AuthController {
     @SkipThrottle(false)
     @Post("registration")
     @HttpCode(204)
-    async createBlog(@Body() dto: InputModelForCreatingNewUser): Promise<boolean> {
+    async createNewUser(@Body() dto: InputModelForCreatingNewUser): Promise<boolean> {
         return await this.commandBus.execute(new CreateUserWithConfirmationEmailCommand(dto));
     }
 
