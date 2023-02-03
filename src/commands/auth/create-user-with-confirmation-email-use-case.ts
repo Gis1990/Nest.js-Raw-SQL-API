@@ -21,9 +21,8 @@ export class CreateUserWithConfirmationEmailUseCase implements ICommandHandler<C
     async execute(command: CreateUserWithConfirmationEmailCommand): Promise<boolean> {
         await this.authService.createUser(command.dto, false);
         const user = await this.queryBus.execute(new GetUserByLoginOrEmailCommand(command.dto.login));
-        const confirmationCode = user.emailConfirmation.confirmationCode;
+        const confirmationCode = user.emailConfirmationCode;
         await this.commandBus.execute(new SendEmailForRegistrationCommand(command.dto.email, confirmationCode));
-        await this.usersRepository.addEmailLog(command.dto.email);
         return true;
     }
 }

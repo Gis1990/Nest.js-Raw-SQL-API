@@ -24,7 +24,6 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
             await this.commandBus.execute(
                 new SendEmailForRegistrationCommand(command.dto.email, updatedUser.emailConfirmationCode),
             );
-            await this.usersRepository.addEmailLog(command.dto.email);
             return true;
         } else {
             return false;

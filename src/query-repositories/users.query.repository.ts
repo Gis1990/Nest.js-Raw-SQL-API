@@ -52,14 +52,17 @@ export class UsersQueryRepository {
                 whereClause += `ORDER BY "${sortBy}" ${sort} LIMIT $1 OFFSET $2`;
             }
         }
-
         const query = `SELECT id,login,email,"createdAt","isBanned","banDate","banReason" FROM users  
         ${whereClause}  ${
-            banStatus === "banned" ? "AND 'isBanned' = true" : banStatus === "notBanned" ? "AND 'isBanned' = false" : ""
+            banStatus === "banned"
+                ? `AND  "isBanned" = true`
+                : banStatus === "notBanned"
+                ? `AND "isBanned" = false`
+                : ""
         } `;
         const queryForCount = `SELECT COUNT(*) FROM users          
          ${whereClauseForCount}  ${
-            banStatus === "banned" ? "AND 'isBanned' = true" : banStatus === "notBanned" ? "AND 'isBanned' = false" : ""
+            banStatus === "banned" ? `AND "isBanned" = true` : banStatus === "notBanned" ? `AND "isBanned" = false` : ""
         }`;
         const cursor = await this.dataSource.query(query, queryParams);
         const totalCount = await this.dataSource.query(queryForCount, queryParamsForCount);
@@ -113,7 +116,10 @@ export class UsersQueryRepository {
         };
     }
 
-    async getUserById(id: number): Promise<UserModelClass | null> {
+    async getUserById(id: string | undefined): Promise<UserModelClass | null> {
+        if (id) {
+            id.toString();
+        }
         const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [id]);
         const devices = await this.dataSource.query(
             `SELECT ip,"lastActiveDate", "deviceId",title FROM devices WHERE "userId" = $1 `,

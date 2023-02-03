@@ -104,14 +104,6 @@ export class UsersRepository {
         return result[1] > 0;
     }
 
-    async addEmailLog(email: string): Promise<boolean> {
-        const result = await this.dataSource.query(
-            `UPDATE users SET "sentEmails" = sentEmails || '{${email}}' WHERE email = $1 RETURNING id`,
-            [email],
-        );
-        return result[1] > 0;
-    }
-
     async createUser(newUser: CreatedNewUserDto): Promise<UsersClass> {
         const result = await this.dataSource.query(
             `INSERT INTO users (login, email, "passwordHash", "createdAt", "emailConfirmed", "emailConfirmationCode", "emailExpirationDate",

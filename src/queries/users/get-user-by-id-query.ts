@@ -11,6 +11,6 @@ export class GetUserByIdQuery implements IQueryHandler<GetUserByIdCommand> {
     constructor(private usersQueryRepository: UsersQueryRepository) {}
 
     async execute(query: GetUserByIdCommand): Promise<UserModelClass | null> {
-        return await this.usersQueryRepository.getUserById(Number(query.userId));
+        return await this.usersQueryRepository.getUserById(query.userId);
     }
 }
