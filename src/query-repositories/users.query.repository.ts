@@ -117,11 +117,11 @@ export class UsersQueryRepository {
     }
 
     async getUserById(id: string | undefined): Promise<UserModelClass | null> {
+        if (id) {
+            Number(id);
+        }
         if (!Number.isInteger(id)) {
             return null;
-        }
-        if (id) {
-            id.toString();
         }
         const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [id]);
         const devices = await this.dataSource.query(

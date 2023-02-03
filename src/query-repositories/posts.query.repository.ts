@@ -9,13 +9,11 @@ export class PostsQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
 
     async getAllPosts(dto: ModelForGettingAllPosts, userId: string | undefined): Promise<PostClassPaginationDto> {
-        if (userId) {
-            Number(userId);
-        }
+        const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
-        const queryParamsForAllPosts: any = [userId, pageSize, offset];
+        const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
         const query = `SELECT posts.*, COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
@@ -63,13 +61,11 @@ export class PostsQueryRepository {
         blogId: number,
         userId: string | undefined,
     ): Promise<PostClassPaginationDto> {
-        if (userId) {
-            Number(userId);
-        }
+        const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
-        const queryParamsForAllPostsForSpecificBlog: any = [userId, blogId, pageSize, offset];
+        const queryParamsForAllPostsForSpecificBlog: any = [correctUserId, blogId, pageSize, offset];
         const query = `SELECT posts.*, COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'

@@ -7,11 +7,11 @@ export class CommentsQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
 
     async getCommentById(id: number, userId: string | undefined): Promise<CommentsClass | null> {
-        if (!Number.isInteger(id)) {
-            return null;
-        }
         if (userId) {
             Number(userId);
+        }
+        if (!Number.isInteger(userId)) {
+            return null;
         }
         const result = await this.dataSource.query(
             `SELECT comments.*, COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
@@ -42,13 +42,11 @@ export class CommentsQueryRepository {
         postId: number,
         userId: string | undefined,
     ): Promise<CommentClassPaginationDto> {
-        if (userId) {
-            Number(userId);
-        }
+        const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
-        const queryParamsForAllPosts: any = [userId, postId, pageSize, offset];
+        const queryParamsForAllPosts: any = [correctUserId, postId, pageSize, offset];
         const query = `SELECT comments.*, COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
@@ -95,13 +93,11 @@ export class CommentsQueryRepository {
         dto: ModelForGettingAllComments,
         userId: string | undefined,
     ): Promise<CommentClassPaginationDto> {
-        if (userId) {
-            Number(userId);
-        }
+        const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
-        const queryParamsForAllPosts: any = [userId, pageSize, offset];
+        const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
         const query = `SELECT comments.*,posts.title,posts."blogId",blogs."name", COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
