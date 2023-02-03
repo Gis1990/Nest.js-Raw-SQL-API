@@ -44,8 +44,8 @@ export class UsersQueryRepository {
                 queryParams.unshift(`%${searchEmailTerm}%`);
                 queryParamsForCount.unshift(`%${searchEmailTerm}%`);
             } else {
-                whereClause += `AND email ILIKE $${paramsCounter} `;
-                whereClauseForCount += `AND email ILIKE $${paramsCounter} `;
+                whereClause += `OR email ILIKE $${paramsCounter} `;
+                whereClauseForCount += `OR email ILIKE $${paramsCounter} `;
                 queryParams.splice(1, 0, `%${searchEmailTerm}%`);
                 queryParamsForCount.splice(1, 0, `%${searchEmailTerm}%`);
             }
