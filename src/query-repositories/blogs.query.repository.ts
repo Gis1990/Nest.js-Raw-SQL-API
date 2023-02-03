@@ -123,6 +123,9 @@ export class BlogsQueryRepository {
     }
 
     async getBlogById(id: number): Promise<BlogClass | null> {
+        if (!Number.isInteger(id)) {
+            return null;
+        }
         const result = await this.dataSource.query(`SELECT * FROM blogs WHERE id = $1 AND "isBanned" = false`, [id]);
         return result[0] || null;
     }

@@ -117,6 +117,9 @@ export class PostsQueryRepository {
     }
 
     async getPostById(id: number, userId: string | undefined): Promise<PostsClass | null> {
+        if (!Number.isInteger(id)) {
+            return null;
+        }
         if (userId) {
             Number(userId);
         }

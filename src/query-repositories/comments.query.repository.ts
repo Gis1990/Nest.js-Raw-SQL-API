@@ -7,6 +7,9 @@ export class CommentsQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
 
     async getCommentById(id: number, userId: string | undefined): Promise<CommentsClass | null> {
+        if (!Number.isInteger(id)) {
+            return null;
+        }
         if (userId) {
             Number(userId);
         }

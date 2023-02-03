@@ -117,6 +117,9 @@ export class UsersQueryRepository {
     }
 
     async getUserById(id: string | undefined): Promise<UserModelClass | null> {
+        if (!Number.isInteger(id)) {
+            return null;
+        }
         if (id) {
             id.toString();
         }
