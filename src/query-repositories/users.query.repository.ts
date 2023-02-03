@@ -64,6 +64,7 @@ export class UsersQueryRepository {
          ${whereClauseForCount}  ${
             banStatus === "banned" ? `AND "isBanned" = true` : banStatus === "notBanned" ? `AND "isBanned" = false` : ""
         }`;
+        console.log(query);
         const cursor = await this.dataSource.query(query, queryParams);
         const totalCount = await this.dataSource.query(queryForCount, queryParamsForCount);
         return {
