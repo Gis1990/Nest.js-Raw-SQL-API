@@ -20,7 +20,7 @@ export class PostsQueryRepository {
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
         ELSE 'None'
         END AS "myStatus",
-        (SELECT array_agg("usersWhoPutLikeForPost" ORDER BY COLLATE "C" "addedAt" DESC )
+        (SELECT array_agg("usersWhoPutLikeForPost" ORDER BY  "addedAt" DESC )
          FROM "usersWhoPutLikeForPost"
          WHERE "postId" = posts.id
         ) AS "lastLikes"
@@ -34,7 +34,7 @@ export class PostsQueryRepository {
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY posts.id
-        ORDER BY posts."${sortBy}" COLLATE "C" ${sort} LIMIT $2 OFFSET $3`;
+        ORDER BY posts."${sortBy}"  ${sort} LIMIT $2 OFFSET $3`;
 
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
 
@@ -88,7 +88,7 @@ export class PostsQueryRepository {
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY posts.id
-        ORDER BY posts."${sortBy}" COLLATE "C" ${sort} LIMIT $3 OFFSET $4`;
+        ORDER BY posts."${sortBy}"  ${sort} LIMIT $3 OFFSET $4`;
 
         const cursor = await this.dataSource.query(query, queryParamsForAllPostsForSpecificBlog);
 
