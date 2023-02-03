@@ -117,10 +117,11 @@ export class UsersQueryRepository {
     }
 
     async getUserById(id: string | undefined): Promise<UserModelClass | null> {
+        let correctId;
         if (id) {
-            Number(id);
+            correctId = Number(id);
         }
-        if (Number.isInteger(id)) {
+        if (!Number.isInteger(correctId)) {
             return null;
         }
         const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [id]);
