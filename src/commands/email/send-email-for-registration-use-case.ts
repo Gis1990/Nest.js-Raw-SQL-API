@@ -23,7 +23,7 @@ export class SendEmailForRegistrationUseCase implements ICommandHandler<SendEmai
             from: "Anton Pavlovskiy",
             to: command.email,
             subject: "Code for registration",
-            text: `https://somesite.com/registration?confirmationCode=${command.confirmationCode}`,
+            text: `https://somesite.com/confirm-email?code=${command.confirmationCode}`,
         });
         return true;
     }

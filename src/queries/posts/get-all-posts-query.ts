@@ -13,7 +13,6 @@ export class GetAllPostsQuery implements IQueryHandler<GetAllPostsCommand> {
     constructor(private postsQueryRepository: PostsQueryRepository) {}
 
     async execute(query: GetAllPostsCommand): Promise<PostViewModelClassPagination> {
-        console.log(query.userId);
         const posts = await this.postsQueryRepository.getAllPosts(query.dto, query.userId);
         return await PostsFactory.createPostViewModelClassPagination(posts);
     }

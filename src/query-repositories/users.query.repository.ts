@@ -29,42 +29,50 @@ export class UsersQueryRepository {
         const queryParamsForCount = [];
         let whereClause = "";
         let whereClauseForCount = "";
+        let paramsCounter = 1;
         if (searchLoginTerm) {
-            whereClause += `WHERE login LIKE $1 ORDER BY "${sortBy}" ${sort} LIMIT $2 OFFSET $3`;
-            whereClauseForCount += `WHERE login LIKE $1`;
+            whereClause += `WHERE login LIKE $${paramsCounter} `;
+            whereClauseForCount += `WHERE login LIKE $${paramsCounter} `;
             queryParams.unshift(`%${searchLoginTerm}%`);
             queryParamsForCount.unshift(`%${searchLoginTerm}%`);
+            paramsCounter++;
         }
         if (searchEmailTerm) {
             if (whereClause === "") {
-                whereClause += `WHERE email LIKE $1 ORDER BY "${sortBy}" ${sort} LIMIT $2 OFFSET $3`;
-                whereClauseForCount += `WHERE email LIKE $1`;
-                queryParams.unshift(`%${searchLoginTerm}%`);
-                queryParamsForCount.unshift(`%${searchLoginTerm}%`);
+                whereClause += `WHERE email LIKE $${paramsCounter} `;
+                whereClauseForCount += `WHERE email LIKE $${paramsCounter} `;
+                queryParams.unshift(`%${searchEmailTerm}%`);
+                queryParamsForCount.unshift(`%${searchEmailTerm}%`);
             } else {
-                whereClause = `WHERE login LIKE $1 AND email LIKE $2 ORDER BY "${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
-                whereClauseForCount = `WHERE login LIKE $1 AND email LIKE $2`;
+                whereClause += `AND email LIKE $${paramsCounter} `;
+                whereClauseForCount += `AND email LIKE $${paramsCounter} `;
                 queryParams.splice(1, 0, `%${searchEmailTerm}%`);
                 queryParamsForCount.splice(1, 0, `%${searchEmailTerm}%`);
             }
-        } else {
+            paramsCounter++;
+        }
+        if (banStatus === "banned") {
             if (whereClause === "") {
-                whereClause += `ORDER BY "${sortBy}" ${sort} LIMIT $1 OFFSET $2`;
+                whereClause += `WHERE "isBanned" = true`;
+                whereClauseForCount += `WHERE "isBanned" = true`;
+            } else {
+                whereClause += `AND  "isBanned" = true`;
+                whereClauseForCount += `AND  "isBanned" = true`;
+            }
+        } else if (banStatus === "notBanned") {
+            if (whereClause === "") {
+                whereClause += `WHERE "isBanned" = false`;
+                whereClauseForCount += `WHERE "isBanned" = false`;
+            } else {
+                whereClause += `AND "isBanned" = false`;
+                whereClauseForCount += `AND "isBanned" = false`;
             }
         }
+        whereClause += ` ORDER BY "${sortBy}" ${sort} LIMIT $${paramsCounter} OFFSET $${paramsCounter + 1}`;
         const query = `SELECT id,login,email,"createdAt","isBanned","banDate","banReason" FROM users  
-        ${whereClause}  ${
-            banStatus === "banned"
-                ? `AND  "isBanned" = true`
-                : banStatus === "notBanned"
-                ? `AND "isBanned" = false`
-                : ""
-        } `;
+        ${whereClause} `;
         const queryForCount = `SELECT COUNT(*) FROM users          
-         ${whereClauseForCount}  ${
-            banStatus === "banned" ? `AND "isBanned" = true` : banStatus === "notBanned" ? `AND "isBanned" = false` : ""
-        }`;
-        console.log(query);
+         ${whereClauseForCount} `;
         const cursor = await this.dataSource.query(query, queryParams);
         const totalCount = await this.dataSource.query(queryForCount, queryParamsForCount);
         return {
