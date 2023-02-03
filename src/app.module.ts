@@ -14,6 +14,7 @@ import { TestingModule } from "./modules/testing(delete all)/testing.module";
 import { SecurityModule } from "./modules/security/security.module";
 import { CommentsModule } from "./modules/comments/comments.module";
 import { PostsModule } from "./modules/posts/posts.module";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 @Module({
     imports: [
@@ -33,10 +34,10 @@ import { PostsModule } from "./modules/posts/posts.module";
             inject: [ConfigService],
         }),
         ConfigModule.forRoot({ isGlobal: true, load: [config] }),
-        // ThrottlerModule.forRoot({
-        //     ttl: 10,
-        //     limit: 5,
-        // }),
+        ThrottlerModule.forRoot({
+            ttl: 10,
+            limit: 5,
+        }),
         BlogsModule,
         PostsModule,
         AuthModule,
@@ -49,10 +50,10 @@ import { PostsModule } from "./modules/posts/posts.module";
     controllers: [AppController],
     providers: [
         AppService,
-        // {
-        //     provide: APP_GUARD,
-        //     useClass: ThrottlerGuard,
-        // },
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
+        },
     ],
 })
 export class AppModule {}
