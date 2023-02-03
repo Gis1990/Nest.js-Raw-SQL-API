@@ -120,7 +120,7 @@ export class UsersQueryRepository {
         if (id) {
             Number(id);
         }
-        if (!Number.isInteger(id)) {
+        if (Number.isInteger(id)) {
             return null;
         }
         const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [id]);
