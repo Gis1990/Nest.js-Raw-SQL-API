@@ -31,21 +31,21 @@ export class UsersQueryRepository {
         let whereClauseForCount = "";
         let paramsCounter = 1;
         if (searchLoginTerm) {
-            whereClause += `WHERE login LIKE $${paramsCounter} `;
-            whereClauseForCount += `WHERE login LIKE $${paramsCounter} `;
+            whereClause += `WHERE login ILIKE $${paramsCounter} `;
+            whereClauseForCount += `WHERE login ILIKE $${paramsCounter} `;
             queryParams.unshift(`%${searchLoginTerm}%`);
             queryParamsForCount.unshift(`%${searchLoginTerm}%`);
             paramsCounter++;
         }
         if (searchEmailTerm) {
             if (whereClause === "") {
-                whereClause += `WHERE email LIKE $${paramsCounter} `;
-                whereClauseForCount += `WHERE email LIKE $${paramsCounter} `;
+                whereClause += `WHERE email ILIKE $${paramsCounter} `;
+                whereClauseForCount += `WHERE email ILIKE $${paramsCounter} `;
                 queryParams.unshift(`%${searchEmailTerm}%`);
                 queryParamsForCount.unshift(`%${searchEmailTerm}%`);
             } else {
-                whereClause += `AND email LIKE $${paramsCounter} `;
-                whereClauseForCount += `AND email LIKE $${paramsCounter} `;
+                whereClause += `AND email ILIKE $${paramsCounter} `;
+                whereClauseForCount += `AND email ILIKE $${paramsCounter} `;
                 queryParams.splice(1, 0, `%${searchEmailTerm}%`);
                 queryParamsForCount.splice(1, 0, `%${searchEmailTerm}%`);
             }
@@ -102,8 +102,8 @@ export class UsersQueryRepository {
         let whereClause = "";
         let whereClauseForCount = "";
         if (searchLoginTerm) {
-            whereClause += `AND login LIKE $3 ORDER BY "${sortBy}" ${sort} LIMIT $4 OFFSET $5`;
-            whereClauseForCount += `AND login LIKE $3`;
+            whereClause += `AND login ILIKE $3 ORDER BY "${sortBy}" ${sort} LIMIT $4 OFFSET $5`;
+            whereClauseForCount += `AND login ILIKE $3`;
             queryParamsForBannedUsers.splice(2, 0, `%${searchLoginTerm}%`);
             queryParamsForCountForBannedUsers.push(`%${searchLoginTerm}%`);
         } else {
