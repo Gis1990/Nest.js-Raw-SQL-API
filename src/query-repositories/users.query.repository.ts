@@ -68,12 +68,15 @@ export class UsersQueryRepository {
                 whereClauseForCount += `AND "isBanned" = false`;
             }
         }
-        whereClause += ` ORDER BY LOWER ("${sortBy}") ${sort} LIMIT $${paramsCounter} OFFSET $${paramsCounter + 1}`;
+        whereClause += ` ORDER BY "${sortBy}" ${sort} LIMIT $${paramsCounter} OFFSET $${paramsCounter + 1}`;
         const query = `SELECT id,login,email,"createdAt","isBanned","banDate","banReason" FROM users  
         ${whereClause} `;
         const queryForCount = `SELECT COUNT(*) FROM users          
          ${whereClauseForCount} `;
+        console.log(query);
+        console.log(queryParams);
         const cursor = await this.dataSource.query(query, queryParams);
+        console.log(cursor);
         const totalCount = await this.dataSource.query(queryForCount, queryParamsForCount);
         return {
             pagesCount: Math.ceil(Number(totalCount[0].count) / pageSize),
@@ -102,12 +105,12 @@ export class UsersQueryRepository {
         let whereClause = "";
         let whereClauseForCount = "";
         if (searchLoginTerm) {
-            whereClause += `AND login ILIKE $3 ORDER BY LOWER ("${sortBy}") ${sort} LIMIT $4 OFFSET $5`;
+            whereClause += `AND login ILIKE $3 ORDER BY "${sortBy}" ${sort} LIMIT $4 OFFSET $5`;
             whereClauseForCount += `AND login ILIKE $3`;
             queryParamsForBannedUsers.splice(2, 0, `%${searchLoginTerm}%`);
             queryParamsForCountForBannedUsers.push(`%${searchLoginTerm}%`);
         } else {
-            whereClause += ` ORDER BY LOWER ("${sortBy}") ${sort} LIMIT $3 OFFSET $4`;
+            whereClause += ` ORDER BY "${sortBy}" ${sort} LIMIT $3 OFFSET $4`;
         }
         const query = `SELECT u.id,u.login,bb."isBanned",bb."banDate",bb."banReason" FROM users u JOIN "bannedBlogs" bb ON u.id = bb."userId" WHERE bb."blogId" = $1 AND bb."isBanned" = $2 
         ${whereClause}`;
