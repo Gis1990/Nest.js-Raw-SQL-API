@@ -73,12 +73,11 @@ export class UsersQueryRepository {
                 paramsCounter + 1
             }`;
         } else {
-            whereClause += ` ORDER BY "${sortBy}" COLLATE "C" ${sort} LIMIT $${paramsCounter} OFFSET $${
-                paramsCounter + 1
-            }`;
+            whereClause += ` ORDER BY "${sortBy}" ${sort} LIMIT $${paramsCounter} OFFSET $${paramsCounter + 1}`;
         }
         const query = `SELECT id,login,email,"createdAt","isBanned","banDate","banReason" FROM users  
         ${whereClause} `;
+        console.log(query);
         const queryForCount = `SELECT COUNT(*) FROM users          
          ${whereClauseForCount} `;
         const cursor = await this.dataSource.query(query, queryParams);
