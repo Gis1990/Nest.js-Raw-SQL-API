@@ -113,7 +113,7 @@ export class AuthController {
         response.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: true,
-            maxAge: 200000 * 1000, // 20 seconds
+            maxAge: 20 * 1000, // 20 seconds
         });
         return;
     }
