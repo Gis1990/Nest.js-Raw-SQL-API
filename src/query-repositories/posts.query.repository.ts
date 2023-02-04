@@ -33,7 +33,7 @@ export class PostsQueryRepository {
         AND blogs."isBanned" = false
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY posts.id
+        GROUP BY posts.id,blogs.name
         ORDER BY posts."${sortBy}"  ${sort} LIMIT $2 OFFSET $3`;
 
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
@@ -87,7 +87,7 @@ export class PostsQueryRepository {
         AND posts."blogId" = $2
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY posts.id
+        GROUP BY posts.id,blogs.name
         ORDER BY posts."${sortBy}"  ${sort} LIMIT $3 OFFSET $4`;
 
         const cursor = await this.dataSource.query(query, queryParamsForAllPostsForSpecificBlog);
@@ -145,7 +145,6 @@ export class PostsQueryRepository {
         GROUP BY posts.id,blogs.name`,
             [userId, correctId],
         );
-        console.log(result[0]);
         return result[0] || null;
     }
 

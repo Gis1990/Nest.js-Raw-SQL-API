@@ -145,11 +145,11 @@ export class CommentsQueryRepository {
             return null;
         } else {
             result[0].likesArray = await this.dataSource.query(
-                `SELECT * FROM "usersWhoPutLikeForComment" WHERE "postId" = $1`,
+                `SELECT * FROM "usersWhoPutLikeForComment" WHERE "commentId" = $1`,
                 [id],
             );
             result[0].dislikesArray = await this.dataSource.query(
-                `SELECT * FROM "usersWhoPutDislikeForComment" WHERE "postId" = $1`,
+                `SELECT * FROM "usersWhoPutDislikeForComment" WHERE "commentId" = $1`,
                 [id],
             );
             return result[0];
