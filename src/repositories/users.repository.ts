@@ -4,7 +4,6 @@ import { BanInfoClass, CreatedNewUserDto } from "../dtos/users.dto";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { UsersClass } from "../schemas/users.schema";
-import { UserDevicesDataClass } from "../dtos/auth.dto";
 
 @Injectable()
 export class UsersRepository {
@@ -89,22 +88,23 @@ export class UsersRepository {
 
     async updateLastActiveDate(deviceId: string, newLastActiveDate: Date): Promise<boolean> {
         const result = await this.dataSource.query(
-            `UPDATE devices SET "lastActiveDate" = $1 WHERE "deviceId" = $2 RETURNING id`,
+            `UPDATE devices SET "lastActiveDate" = $1 WHERE "deviceId" = $2 RETURNING "userId"`,
             [newLastActiveDate, deviceId],
         );
+        const userId = result[0][0].userId;
+        await this.dataSource.query(`UPDATE users SET "currentSessionLastActiveDate" = $1 WHERE id = $2`, [
+            newLastActiveDate,
+            userId,
+        ]);
         return result[1] > 0;
     }
 
-    async terminateAllDevices(id: number, userDevicesData: UserDevicesDataClass): Promise<boolean> {
-        if (!userDevicesData.title) {
-            userDevicesData.title = "unknown";
-        }
-        await this.dataSource.query(`DELETE FROM devices WHERE "userId" = $1`, [id]);
+    async terminateAllDevices(id: number, deviceId: string): Promise<boolean> {
         const result = await this.dataSource.query(
-            `INSERT INTO devices ("userId", ip, "lastActiveDate", "deviceId", title) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            [id, userDevicesData.ip, new Date(), userDevicesData.deviceId, userDevicesData.title],
+            `DELETE FROM devices WHERE "userId" = $1 AND "deviceId" !=$2 RETURNING id`,
+            [id, deviceId],
         );
-        return !!result[0].id;
+        return result[1] > 0;
     }
 
     async terminateSpecificDevice(id: number, deviceId: string): Promise<boolean> {

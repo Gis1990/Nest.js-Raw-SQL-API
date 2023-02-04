@@ -77,7 +77,6 @@ export class UsersQueryRepository {
         }
         const query = `SELECT id,login,email,"createdAt","isBanned","banDate","banReason" FROM users  
         ${whereClause} `;
-        console.log(query);
         const queryForCount = `SELECT COUNT(*) FROM users          
          ${whereClauseForCount} `;
         const cursor = await this.dataSource.query(query, queryParams);
@@ -179,7 +178,6 @@ export class UsersQueryRepository {
         if (!devices[0]) {
             return null;
         }
-        console.log(devices[0].id);
         const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [devices[0].userId]);
         if (!user[0]) {
             return null;

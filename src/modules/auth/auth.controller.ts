@@ -79,7 +79,7 @@ export class AuthController {
         response.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: true,
-            maxAge: 200000 * 1000, // 20 seconds
+            maxAge: 2 * 1000, // 20 seconds
         });
         return new AccessTokenClass(accessToken);
     }
@@ -97,7 +97,7 @@ export class AuthController {
         response.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: true,
-            maxAge: 200000 * 1000, // 20 seconds
+            maxAge: 2 * 1000, // 20 seconds
         });
         return new AccessTokenClass(accessToken);
     }
@@ -113,7 +113,7 @@ export class AuthController {
         response.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: true,
-            maxAge: 200000 * 1000, // 20 seconds
+            maxAge: 2 * 1000, // 20 seconds
         });
         return;
     }
