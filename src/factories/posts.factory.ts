@@ -18,10 +18,10 @@ export class PostsFactory {
             post.blogName,
             post.createdAt,
             {
-                likesCount: 0,
-                dislikesCount: 0,
-                myStatus: "None",
-                newestLikes: [],
+                likesCount: Number(post.likesCount),
+                dislikesCount: Number(post.dislikesCount),
+                myStatus: post.myStatus,
+                newestLikes: correctLikes,
             },
         );
     }
@@ -37,10 +37,3 @@ export class PostsFactory {
         return new PostViewModelClassPagination(dto.pagesCount, dto.page, dto.pageSize, dto.totalCount, result);
     }
 }
-
-// {
-//     likesCount: Number(post.likesCount),
-//         dislikesCount: Number(post.dislikesCount),
-//     myStatus: post.myStatus,
-//     newestLikes: correctLikes,
-// },
