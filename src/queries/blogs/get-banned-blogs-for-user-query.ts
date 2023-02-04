@@ -11,6 +11,6 @@ export class GetBannedBlogsForUserQuery implements IQueryHandler<GetBannedBlogsF
     constructor(private blogsQueryRepository: BlogsQueryRepository) {}
 
     async execute(query: GetBannedBlogsForUserCommand): Promise<BannedBlogsClass> {
-        return await this.blogsQueryRepository.getBannedBlogsForUser(Number(query.userId));
+        return await this.blogsQueryRepository.getBannedBlogsForUser(query.userId);
     }
 }

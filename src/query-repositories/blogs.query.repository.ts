@@ -69,7 +69,7 @@ export class BlogsQueryRepository {
         } else {
             whereClause += `ORDER BY "${sortBy}"  ${sort} LIMIT $2 OFFSET $3`;
         }
-        const query = `SELECT id,name,description,"websiteUrl", "createdAt" FROM blogs WHERE "isBanned" = false AND "blogOwnerUserId"=$1 ${whereClause}`;
+        const query = `SELECT id,name,description,"websiteUrl", "createdAt","isMembership" FROM blogs WHERE "isBanned" = false AND "blogOwnerUserId"=$1 ${whereClause}`;
         const cursor = await this.dataSource.query(query, queryParamsForAllBlogsForAuthorizedUser);
         const totalCount = await this.dataSource.query(
             `SELECT COUNT(*) FROM blogs WHERE "isBanned" = false AND "blogOwnerUserId"=$1 ${whereClauseForCount}`,
@@ -135,8 +135,15 @@ export class BlogsQueryRepository {
         return result[0] || null;
     }
 
-    async getBlogByIdForBanUnbanOperation(id: number): Promise<BlogClass | null> {
-        const result = await this.dataSource.query(`SELECT * FROM blogs WHERE id = $1`, [id]);
+    async getBlogByIdForBanUnbanOperation(id: string): Promise<BlogClass | null> {
+        let correctId;
+        if (id) {
+            correctId = Number(id);
+        }
+        if (!Number.isInteger(correctId)) {
+            return null;
+        }
+        const result = await this.dataSource.query(`SELECT * FROM blogs WHERE id = $1`, [correctId]);
         return result[0] || null;
     }
 
@@ -156,8 +163,15 @@ export class BlogsQueryRepository {
         return result[0] || null;
     }
 
-    async getBannedBlogsForUser(userId: number): Promise<BannedBlogsClass | null> {
-        const result = await this.dataSource.query(`SELECT * FROM "bannedBlogs" WHERE "userId" = $1`, [userId]);
+    async getBannedBlogsForUser(userId: string): Promise<BannedBlogsClass | null> {
+        let correctId;
+        if (userId) {
+            correctId = Number(userId);
+        }
+        if (!Number.isInteger(correctId)) {
+            return null;
+        }
+        const result = await this.dataSource.query(`SELECT * FROM "bannedBlogs" WHERE "userId" = $1`, [correctId]);
         return result[0] || null;
     }
 }

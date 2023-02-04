@@ -14,7 +14,7 @@ export class PostsQueryRepository {
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
-        const query = `SELECT posts.*, COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
+        const query = `SELECT posts.*,blogs.name as "blogName", COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
@@ -66,7 +66,7 @@ export class PostsQueryRepository {
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPostsForSpecificBlog: any = [correctUserId, blogId, pageSize, offset];
-        const query = `SELECT posts.*, COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
+        const query = `SELECT posts.*,blogs.name as "blogName", COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
@@ -121,7 +121,7 @@ export class PostsQueryRepository {
             return null;
         }
         const result = await this.dataSource.query(
-            `SELECT posts.*, COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
+            `SELECT posts.*,blogs.name as "blogName", COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
@@ -142,9 +142,10 @@ export class PostsQueryRepository {
         AND posts.id = $2
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY posts.id`,
+        GROUP BY posts.id,blogs.name`,
             [userId, correctId],
         );
+        console.log(result[0]);
         return result[0] || null;
     }
 
