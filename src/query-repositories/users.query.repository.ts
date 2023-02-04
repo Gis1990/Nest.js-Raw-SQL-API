@@ -179,7 +179,8 @@ export class UsersQueryRepository {
         if (!devices[0]) {
             return null;
         }
-        const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [devices[0].id]);
+        console.log(devices[0].id);
+        const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [devices[0].userId]);
         if (!user[0]) {
             return null;
         }

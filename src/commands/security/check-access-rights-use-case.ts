@@ -15,6 +15,8 @@ export class CheckAccessRightsUseCase implements ICommandHandler<CheckAccessRigh
 
     async execute(command: CheckAccessRightsCommand): Promise<boolean> {
         const userByDeviceId = await this.queryBus.execute(new GetUserByDeviceIdCommand(command.deviceId));
+        console.log(userByDeviceId);
+        console.log(userByDeviceId.id);
         if (userByDeviceId) {
             return command.userWithDeviceData.id === userByDeviceId.id;
         } else {
