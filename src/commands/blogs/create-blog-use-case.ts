@@ -19,8 +19,10 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
             description: command.dto.description,
             websiteUrl: command.dto.websiteUrl,
             createdAt: new Date(),
-            blogOwnerInfo: { userId: Number(command.user.id), userLogin: command.user.login },
-            banInfo: { isBanned: false, banDate: null },
+            isBanned: false,
+            banDate: null,
+            blogOwnerUserId: Number(command.user.id),
+            blogOwnerLogin: command.user.login,
             isMembership: false,
         };
         const createdBlog = await this.blogsRepository.createBlog(createdBlogDto);

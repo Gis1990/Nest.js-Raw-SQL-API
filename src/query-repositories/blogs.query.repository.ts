@@ -152,7 +152,7 @@ export class BlogsQueryRepository {
             `SELECT id, name, description, "websiteUrl", "createdAt","isMembership" FROM blogs WHERE id= $1`,
             [correctId],
         );
-        result[0].id.toString();
+        result[0].id = result[0].id.toString();
         return result[0] || null;
     }
 

@@ -9,17 +9,17 @@ export class BlogsRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
 
     async createBlog(newBlog: CreatedBlogDto): Promise<BlogClass> {
-        const query = `INSERT INTO blogs (name, description, "websiteUrl", "createdAt", "isBanned", "banDate", "blogOwnerUserId", "blogOwnerUserLogin", "isMembership") 
+        const query = `INSERT INTO blogs (name, description, "websiteUrl", "createdAt", "isBanned", "banDate", "blogOwnerUserId", "blogOwnerLogin", "isMembership") 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
         const values = [
             newBlog.name,
             newBlog.description,
             newBlog.websiteUrl,
             newBlog.createdAt,
-            newBlog.banInfo.isBanned,
-            newBlog.banInfo.banDate,
-            newBlog.blogOwnerInfo.userId,
-            newBlog.blogOwnerInfo.userLogin,
+            newBlog.isBanned,
+            newBlog.banDate,
+            newBlog.blogOwnerUserId,
+            newBlog.blogOwnerLogin,
             newBlog.isMembership,
         ];
         const result = await this.dataSource.query(query, values);

@@ -84,14 +84,10 @@ export class CreatedBlogDto {
     public description: string;
     public websiteUrl: string;
     public createdAt: Date;
-    public blogOwnerInfo: {
-        userId: number;
-        userLogin: string;
-    };
-    public banInfo: {
-        isBanned: boolean;
-        banDate: Date;
-    };
+    public isBanned: boolean;
+    public banDate: Date | null;
+    public blogOwnerUserId: number;
+    public blogOwnerLogin: string;
     public isMembership: boolean;
 }
 
