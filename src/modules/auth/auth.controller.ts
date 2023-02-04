@@ -125,7 +125,7 @@ export class AuthController {
         return {
             email: user.email,
             login: user.login,
-            userId: user.id,
+            userId: user.id.toString(),
         };
     }
 }

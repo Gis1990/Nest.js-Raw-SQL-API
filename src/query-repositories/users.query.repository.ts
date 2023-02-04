@@ -176,7 +176,10 @@ export class UsersQueryRepository {
 
     async getUserByDeviceId(deviceId: string): Promise<UserModelClass | null> {
         const devices = await this.dataSource.query(`SELECT * FROM devices WHERE "deviceId" = $1 `, [deviceId]);
-        const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [devices[0].userId]);
+        if (!devices[0]) {
+            return null;
+        }
+        const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [devices[0].id]);
         if (!user[0]) {
             return null;
         }
