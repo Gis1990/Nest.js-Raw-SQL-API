@@ -159,10 +159,10 @@ export class UsersQueryRepository {
             email: user[0].email,
             userDevicesData: devices,
             currentSession: {
-                ip: user[0].ip,
-                lastActiveDate: user[0].lastActiveDate,
-                deviceId: user[0].deviceId,
-                title: user[0].title,
+                ip: user[0].currentSessionIp,
+                lastActiveDate: user[0].currentSessionLastActiveDate,
+                deviceId: user[0].currentSessionDeviceId,
+                title: user[0].currentSessionTitle,
             },
             banInfo: {
                 isBanned: user[0].isBanned,
@@ -186,10 +186,10 @@ export class UsersQueryRepository {
             email: user[0].email,
             userDevicesData: devices,
             currentSession: {
-                ip: user[0].ip,
-                lastActiveDate: user[0].lastActiveDate,
-                deviceId: user[0].deviceId,
-                title: user[0].title,
+                ip: user[0].currentSessionIp,
+                lastActiveDate: user[0].currentSessionLastActiveDate,
+                deviceId: user[0].currentSessionDeviceId,
+                title: user[0].currentSessionTitle,
             },
             banInfo: {
                 isBanned: user[0].isBanned,

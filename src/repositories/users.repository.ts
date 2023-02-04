@@ -52,27 +52,37 @@ export class UsersRepository {
         return result[1] > 0;
     }
 
-    async addUserDevicesData(id: number, ip: string, deviceId: string, title: string): Promise<boolean> {
+    async addUserDevicesData(
+        id: number,
+        ip: string,
+        lastActiveDate: Date,
+        deviceId: string,
+        title: string,
+    ): Promise<boolean> {
         if (!title) {
             title = "Unknown";
         }
-        const date = new Date();
         const result = await this.dataSource.query(
             `INSERT INTO devices ("userId", ip, "lastActiveDate", "deviceId", title) 
         VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            [id, ip, date, deviceId, title],
+            [id, ip, lastActiveDate, deviceId, title],
         );
         return !!result[0].id;
     }
 
-    async addCurrentSession(id: number, ip: string, deviceId: string, title: string): Promise<boolean> {
+    async addCurrentSession(
+        id: number,
+        ip: string,
+        lastActiveDate: Date,
+        deviceId: string,
+        title: string,
+    ): Promise<boolean> {
         if (!title) {
             title = "Unknown";
         }
-        const date = new Date();
         const result = await this.dataSource.query(
             `UPDATE users SET "currentSessionLastActiveDate" = $1,"currentSessionIp" = $2, "currentSessionDeviceId" = $3, "currentSessionTitle" = $4 WHERE id = $5 RETURNING id`,
-            [date, ip, deviceId, title, id],
+            [lastActiveDate, ip, deviceId, title, id],
         );
         return result[1] > 0;
     }
@@ -87,7 +97,7 @@ export class UsersRepository {
 
     async terminateAllDevices(id: number, userDevicesData: UserDevicesDataClass): Promise<boolean> {
         if (!userDevicesData.title) {
-            userDevicesData.title = "Unknown";
+            userDevicesData.title = "unknown";
         }
         await this.dataSource.query(`DELETE FROM devices WHERE "userId" = $1`, [id]);
         const result = await this.dataSource.query(

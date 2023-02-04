@@ -27,19 +27,11 @@ export class CheckCredentialsUseCase implements ICommandHandler<CheckCredentials
         if (!user) return null;
         await this.usersRepository.addLoginAttempt(user.id, command.ip);
         const isHashesEqual = await this.bcryptService._isHashesEquals(command.password, user.passwordHash);
+        const lastActiveDate = new Date();
+        const deviceId = Number(new Date()).toString();
         if (isHashesEqual && user.emailConfirmed) {
-            await this.usersRepository.addUserDevicesData(
-                user.id,
-                command.ip,
-                Number(new Date()).toString(),
-                command.title,
-            );
-            await this.usersRepository.addCurrentSession(
-                user.id,
-                command.ip,
-                Number(new Date()).toString(),
-                command.title,
-            );
+            await this.usersRepository.addUserDevicesData(user.id, command.ip, lastActiveDate, deviceId, command.title);
+            await this.usersRepository.addCurrentSession(user.id, command.ip, lastActiveDate, deviceId, command.title);
             return await this.queryBus.execute(new GetUserByIdCommand(user.id));
         } else {
             return null;
