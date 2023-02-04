@@ -18,9 +18,9 @@ export class CommentsFactory {
             },
             comment.createdAt,
             {
-                likesCount: Number(comment.likesCount),
-                dislikesCount: Number(comment.dislikesCount),
-                myStatus: comment.myStatus,
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: "None",
             },
         );
     }
@@ -73,3 +73,9 @@ export class CommentsFactory {
         );
     }
 }
+
+// {
+//     likesCount: Number(comment.likesCount),
+//         dislikesCount: Number(comment.dislikesCount),
+//     myStatus: comment.myStatus,
+// },
