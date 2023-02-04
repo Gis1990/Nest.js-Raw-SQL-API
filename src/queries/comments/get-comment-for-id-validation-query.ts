@@ -12,7 +12,7 @@ export class GetCommentForIdValidationQuery implements IQueryHandler<GetCommentF
 
     async execute(query: GetCommentForIdValidationCommand): Promise<CommentsClass | null> {
         const userId = undefined;
-        const comment = await this.commentsQueryRepository.getCommentById(Number(query.id), userId);
+        const comment = await this.commentsQueryRepository.getCommentById(query.id, userId);
         if (!comment) {
             return null;
         } else {

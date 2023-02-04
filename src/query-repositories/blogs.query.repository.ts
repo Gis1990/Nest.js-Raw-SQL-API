@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { BlogViewModelClass } from "../entities/blogs.entity";
 import { BlogClassPaginationDto, ModelForGettingAllBlogs } from "../dtos/blogs.dto";
 import { BlogClass } from "../schemas/blogs.schema";
 import { DataSource } from "typeorm";
@@ -122,11 +121,17 @@ export class BlogsQueryRepository {
         };
     }
 
-    async getBlogById(id: number): Promise<BlogClass | null> {
-        if (!Number.isInteger(id)) {
+    async getBlogById(id: string): Promise<BlogClass | null> {
+        let correctId;
+        if (id) {
+            correctId = Number(id);
+        }
+        if (!Number.isInteger(correctId)) {
             return null;
         }
-        const result = await this.dataSource.query(`SELECT * FROM blogs WHERE id = $1 AND "isBanned" = false`, [id]);
+        const result = await this.dataSource.query(`SELECT * FROM blogs WHERE id = $1 AND "isBanned" = false`, [
+            correctId,
+        ]);
         return result[0] || null;
     }
 
@@ -135,11 +140,19 @@ export class BlogsQueryRepository {
         return result[0] || null;
     }
 
-    async getBlogByIdWithCorrectViewModel(id: number): Promise<BlogViewModelClass | null> {
+    async getBlogByIdWithCorrectViewModel(id: string): Promise<BlogClass | null> {
+        let correctId;
+        if (id) {
+            correctId = Number(id);
+        }
+        if (!Number.isInteger(correctId)) {
+            return null;
+        }
         const result = await this.dataSource.query(
-            `SELECT id, name, description, "websiteUrl", "createdAt" FROM blogs WHERE id= $1`,
-            [id],
+            `SELECT id, name, description, "websiteUrl", "createdAt","isMembership" FROM blogs WHERE id= $1`,
+            [correctId],
         );
+        result[0].id.toString();
         return result[0] || null;
     }
 

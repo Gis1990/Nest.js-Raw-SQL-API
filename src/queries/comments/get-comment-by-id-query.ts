@@ -12,7 +12,7 @@ export class GetCommentByIdQuery implements IQueryHandler<GetCommentByIdCommand>
     constructor(private commentsQueryRepository: CommentsQueryRepository) {}
 
     async execute(query: GetCommentByIdCommand): Promise<CommentViewModelClass> {
-        const comment = await this.commentsQueryRepository.getCommentById(Number(query.id), query.userId);
+        const comment = await this.commentsQueryRepository.getCommentById(query.id, query.userId);
         if (!comment) return null;
         return CommentsFactory.createCommentViewModelClass(comment);
     }

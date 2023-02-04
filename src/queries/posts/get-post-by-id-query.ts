@@ -17,11 +17,11 @@ export class GetPostByIdQuery implements IQueryHandler<GetPostByIdCommand> {
     ) {}
 
     async execute(query: GetPostByIdCommand): Promise<PostViewModelClass | null> {
-        const post = await this.postsQueryRepository.getPostById(Number(query.id), query.userId);
+        const post = await this.postsQueryRepository.getPostById(query.id, query.userId);
         if (!post) {
             return null;
         }
-        const blog = await this.blogsQueryRepository.getBlogById(post.blogId);
+        const blog = await this.blogsQueryRepository.getBlogById(post.blogId.toString());
         if (!blog || blog.isBanned) return null;
         return PostsFactory.createPostViewModelClass(post);
     }

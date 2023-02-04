@@ -6,11 +6,12 @@ import { DataSource } from "typeorm";
 export class CommentsQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-    async getCommentById(id: number, userId: string | undefined): Promise<CommentsClass | null> {
-        if (userId) {
-            Number(userId);
+    async getCommentById(id: string, userId: string | undefined): Promise<CommentsClass | null> {
+        let correctId;
+        if (id) {
+            correctId = Number(id);
         }
-        if (!Number.isInteger(userId)) {
+        if (!Number.isInteger(correctId)) {
             return null;
         }
         const result = await this.dataSource.query(
@@ -32,7 +33,7 @@ export class CommentsQueryRepository {
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",comments."commentOwnerUserLogin"`,
-            [userId, id],
+            [userId, correctId],
         );
         return result[0] || null;
     }

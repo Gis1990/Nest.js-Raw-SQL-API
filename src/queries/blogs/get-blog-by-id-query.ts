@@ -11,6 +11,6 @@ export class GetBlogByIdQuery implements IQueryHandler<GetBlogByIdCommand> {
     constructor(private blogsQueryRepository: BlogsQueryRepository) {}
 
     async execute(query: GetBlogByIdCommand): Promise<BlogClass | null> {
-        return await this.blogsQueryRepository.getBlogById(Number(query.id));
+        return await this.blogsQueryRepository.getBlogById(query.id);
     }
 }

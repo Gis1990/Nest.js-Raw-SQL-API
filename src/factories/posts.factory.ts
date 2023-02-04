@@ -15,7 +15,7 @@ export class PostsFactory {
             post.shortDescription,
             post.content,
             post.blogId.toString(),
-            post.blogName,
+            // post.blogName,
             post.createdAt,
             {
                 likesCount: 0,

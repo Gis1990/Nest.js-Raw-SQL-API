@@ -112,8 +112,12 @@ export class PostsQueryRepository {
         };
     }
 
-    async getPostById(id: number, userId: string | undefined): Promise<PostsClass | null> {
-        if (!Number.isInteger(id)) {
+    async getPostById(id: string, userId: string | undefined): Promise<PostsClass | null> {
+        let correctId;
+        if (id) {
+            correctId = Number(id);
+        }
+        if (!Number.isInteger(correctId)) {
             return null;
         }
         const result = await this.dataSource.query(
@@ -139,7 +143,7 @@ export class PostsQueryRepository {
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY posts.id`,
-            [userId, id],
+            [userId, correctId],
         );
         return result[0] || null;
     }
