@@ -106,7 +106,7 @@ export class BlogsQueryRepository {
         } else {
             whereClause += `ORDER BY "${sortBy}"  ${sort} LIMIT $1 OFFSET $2`;
         }
-        const query = `SELECT id,name,description,"websiteUrl", "createdAt" FROM blogs ${whereClause}`;
+        const query = `SELECT * FROM blogs ${whereClause}`;
         const cursor = await this.dataSource.query(query, queryParamsForAllBlogsForSuperAdmin);
         const totalCount = await this.dataSource.query(
             `SELECT COUNT(*) FROM blogs ${whereClauseForCount}`,
