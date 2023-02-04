@@ -28,4 +28,7 @@ export class BlogClass {
 
     @Column()
     blogOwnerLogin: string;
+
+    @Column()
+    isMembership: boolean;
 }

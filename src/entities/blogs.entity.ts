@@ -5,6 +5,7 @@ export class BlogViewModelClass {
         public description: string,
         public websiteUrl: string,
         public createdAt: Date,
+        public isMembership: boolean,
     ) {}
 }
 

@@ -92,6 +92,7 @@ export class CreatedBlogDto {
         isBanned: boolean;
         banDate: Date;
     };
+    public isMembership: boolean;
 }
 
 export class ForBanUnbanBlogBySuperAdminDto {
