@@ -24,14 +24,12 @@ export class CommentsQueryRepository {
           CASE 
             WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForComment"."id" 
-            ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
             WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForComment"."id" 
-            ELSE NULL 
           END
         ) AS "dislikesCount",
         CASE
@@ -72,14 +70,12 @@ export class CommentsQueryRepository {
           CASE 
             WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForComment"."id" 
-            ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
             WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForComment"."id" 
-            ELSE NULL 
           END
         ) AS "dislikesCount",
         CASE
@@ -138,14 +134,12 @@ export class CommentsQueryRepository {
           CASE 
             WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForComment"."id" 
-            ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
             WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForComment"."id" 
-            ELSE NULL 
           END
         ) AS "dislikesCount",
         CASE

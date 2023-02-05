@@ -23,7 +23,7 @@ export class PostsQueryRepository {
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = false AND users.id NOT (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForPost"."id" 
           END
         ) AS "dislikesCount",
@@ -90,7 +90,7 @@ export class PostsQueryRepository {
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = false AND users.id NOT (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForPost"."id" 
           END
         ) AS "dislikesCount",
@@ -163,7 +163,7 @@ export class PostsQueryRepository {
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = false AND users.id NOT (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForPost"."id" 
           END
         ) AS "dislikesCount",
