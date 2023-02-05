@@ -32,7 +32,7 @@ export class LikeOperationForPostUseCase implements ICommandHandler<LikeOperatio
         if (command.likeStatus === "Like" && !isLiked && !isDisliked) {
             update = `INSERT INTO "usersWhoPutLikeForPost" (login, "userId", "addedAt","postId")
         VALUES ($1, $2, $3,$4) RETURNING id`;
-            updateParams = [command.login, Number(command.userId), new Date(), Number(command.id)];
+            updateParams = [command.login, command.userId, new Date(), Number(command.id)];
             doubleOperation = false;
         }
         // If the user wants to dislike the post and has not already liked or disliked it,
@@ -40,7 +40,7 @@ export class LikeOperationForPostUseCase implements ICommandHandler<LikeOperatio
         else if (command.likeStatus === "Dislike" && !isDisliked && !isLiked) {
             update = `INSERT INTO "usersWhoPutDislikeForPost" (login, "userId", "addedAt","postId")
         VALUES ($1, $2, $3,$4) RETURNING id`;
-            updateParams = [command.login, Number(command.userId), new Date(), Number(command.id)];
+            updateParams = [command.login, command.userId, new Date(), Number(command.id)];
             doubleOperation = false;
         }
         // If the user wants to change his status to None,but don't have like or dislike status
@@ -59,24 +59,25 @@ export class LikeOperationForPostUseCase implements ICommandHandler<LikeOperatio
         // Remove the user from the list of users who liked the post,
         else if (command.likeStatus === "None" && isLiked) {
             update = `DELETE FROM "usersWhoPutLikeForPost" WHERE "postId" =$1 AND "userId" = $2 RETURNING id`;
-            updateParams = [Number(command.id), Number(command.userId)];
+            updateParams = [Number(command.id), command.userId];
             doubleOperation = false;
         }
         // If the user wants to change his status to None and has already disliked the post,
         // Remove the user from the list of users who disliked the post,
         else if (command.likeStatus === "None" && isDisliked) {
             update = `DELETE FROM "usersWhoPutDislikeForPost" WHERE "postId" =$1 AND "userId" = $2 RETURNING id`;
-            updateParams = [Number(command.id), Number(command.userId)];
+            updateParams = [Number(command.id), command.userId];
             doubleOperation = false;
         }
         // If the user has already liked the post and wants to dislike it,
         // Remove the user from the list of users who liked the post, and add them to the list of users who disliked the post
         else if (isLiked && command.likeStatus === "Dislike") {
             update = `DELETE FROM "usersWhoPutLikeForPost" WHERE "postId" =$1 AND "userId" = $2`;
-            updateParams = [Number(command.id), Number(command.userId)];
+            updateParams = [Number(command.id), command.userId];
             update2 = `INSERT INTO "usersWhoPutDislikeForPost" (login, "userId", "addedAt","postId")
         VALUES ($1, $2, $3,$4) RETURNING id`;
-            updateParams2 = [command.login, Number(command.userId), new Date(), Number(command.id)];
+            updateParams2 = [command.login, command.userId, new Date(), Number(command.id)];
+            doubleOperation = true;
         }
 
         // If the user has already disliked the post and wants to like it,
@@ -86,7 +87,8 @@ export class LikeOperationForPostUseCase implements ICommandHandler<LikeOperatio
             updateParams = [command.id, command.userId];
             update = `INSERT INTO "usersWhoPutLikeForPost" (login, "userId", "addedAt","postId")
         VALUES ($1, $2, $3,$4) RETURNING id`;
-            updateParams = [command.login, Number(command.userId), new Date(), Number(command.id)];
+            updateParams = [command.login, command.userId, new Date(), Number(command.id)];
+            doubleOperation = true;
         }
 
         return this.postsRepository.likeOperation(update, updateParams, update2, updateParams2, doubleOperation);

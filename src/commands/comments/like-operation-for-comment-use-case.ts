@@ -77,6 +77,7 @@ export class LikeOperationForCommentUseCase implements ICommandHandler<LikeOpera
             update2 = `INSERT INTO "usersWhoPutDislikeForComment" (login, "userId", "addedAt","commentId")
         VALUES ($1, $2, $3,$4) RETURNING id`;
             updateParams2 = [command.login, command.userId, new Date(), Number(command.id)];
+            doubleOperation = true;
         }
 
         // If the user has already disliked the comment and wants to like it,
@@ -87,6 +88,7 @@ export class LikeOperationForCommentUseCase implements ICommandHandler<LikeOpera
             update = `INSERT INTO "usersWhoPutLikeForComment" (login, "userId", "addedAt","commentId")
         VALUES ($1, $2, $3,$4) RETURNING id`;
             updateParams = [command.login, command.userId, new Date(), command.id];
+            doubleOperation = true;
         }
 
         return this.commentsRepository.likeOperation(update, updateParams, update2, updateParams2, doubleOperation);
