@@ -65,7 +65,7 @@ export class CommentsQueryRepository {
         AND comments."postId" = $2
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY comments.id
+        GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",comments."commentOwnerUserLogin"
         ORDER BY posts."${sortBy}"  ${sort} LIMIT $3 OFFSET $4`;
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
 
