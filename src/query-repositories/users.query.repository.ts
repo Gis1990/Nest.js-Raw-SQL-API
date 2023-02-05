@@ -155,7 +155,7 @@ export class UsersQueryRepository {
             return null;
         }
         const correctUser = {
-            id: user[0],
+            id: user[0].id,
             login: user[0].login,
             email: user[0].email,
             userDevicesData: devices,
