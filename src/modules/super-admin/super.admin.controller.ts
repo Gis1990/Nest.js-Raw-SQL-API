@@ -66,7 +66,7 @@ export class SuperAdminController {
         @Param() param: UsersIdValidationModel,
     ): Promise<boolean> {
         return await this.commandBus.execute(
-            new BanUnbanUserBySuperAdminCommand(dto.isBanned, dto.banReason, param.id),
+            new BanUnbanUserBySuperAdminCommand(dto.isBanned, dto.banReason, Number(param.id)),
         );
     }
 
@@ -89,6 +89,6 @@ export class SuperAdminController {
     @Delete("/users/:id")
     @HttpCode(204)
     async deleteUser(@Param() param: UsersIdValidationModel): Promise<boolean> {
-        return await this.commandBus.execute(new DeleteUserCommand(param.id));
+        return await this.commandBus.execute(new DeleteUserCommand(Number(param.id)));
     }
 }

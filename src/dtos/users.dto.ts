@@ -80,7 +80,7 @@ export class UsersIdValidationModel {
     @IsString()
     @IsNotEmpty()
     @IsUsersIdExist()
-    public id: number;
+    public id: string;
 }
 
 export class ModelForGettingAllBannedUsersForBlog {

@@ -140,7 +140,13 @@ export class BloggerController {
         @CurrentUser() user: CurrentUserModel,
     ): Promise<boolean> {
         return await this.commandBus.execute(
-            new BanUnbanUserByBloggerForBlogCommand(dto.isBanned, dto.banReason, dto.blogId, params.id, user.id),
+            new BanUnbanUserByBloggerForBlogCommand(
+                dto.isBanned,
+                dto.banReason,
+                dto.blogId,
+                Number(params.id),
+                user.id,
+            ),
         );
     }
 

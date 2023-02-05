@@ -136,15 +136,21 @@ export class UsersQueryRepository {
     }
 
     async getUserById(id: number | undefined): Promise<UserModelClass | null> {
-        if (!Number.isInteger(id)) {
+        let correctId;
+        if (id) {
+            correctId = Number(id);
+        }
+        if (!Number.isInteger(correctId)) {
             return null;
         }
-        const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [id]);
+        const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [correctId]);
         const devices = await this.dataSource.query(
             `SELECT ip,"lastActiveDate", "deviceId",title FROM devices WHERE "userId" = $1 `,
-            [id],
+            [correctId],
         );
-        const bannedBlogs = await this.dataSource.query(`SELECT * FROM "bannedBlogs" WHERE "userId" = $1 `, [id]);
+        const bannedBlogs = await this.dataSource.query(`SELECT * FROM "bannedBlogs" WHERE "userId" = $1 `, [
+            correctId,
+        ]);
         if (!user[0]) {
             return null;
         }
