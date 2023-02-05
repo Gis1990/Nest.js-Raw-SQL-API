@@ -5,7 +5,7 @@ import { UsersRepository } from "../../repositories/users.repository";
 export class SecurityService {
     constructor(private usersRepository: UsersRepository) {}
 
-    async terminateSpecificDevice(id: string, deviceId: string): Promise<boolean> {
-        return await this.usersRepository.terminateSpecificDevice(Number(id), deviceId);
+    async terminateSpecificDevice(deviceId: string): Promise<boolean> {
+        return await this.usersRepository.terminateSpecificDevice(deviceId);
     }
 }

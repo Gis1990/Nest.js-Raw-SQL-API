@@ -135,12 +135,8 @@ export class UsersQueryRepository {
         };
     }
 
-    async getUserById(id: string | undefined): Promise<UserModelClass | null> {
-        let correctId;
-        if (id) {
-            correctId = Number(id);
-        }
-        if (!Number.isInteger(correctId)) {
+    async getUserById(id: number | undefined): Promise<UserModelClass | null> {
+        if (!Number.isInteger(id)) {
             return null;
         }
         const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [id]);
@@ -153,7 +149,7 @@ export class UsersQueryRepository {
             return null;
         }
         const correctUser = {
-            id: user[0].id.toString(),
+            id: user[0],
             login: user[0].login,
             email: user[0].email,
             userDevicesData: devices,

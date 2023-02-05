@@ -8,7 +8,7 @@ export class GetAllCommentsForSpecificPostCommand {
     constructor(
         public readonly dto: ModelForGettingAllComments,
         public readonly postId: string,
-        public readonly userId: string | undefined,
+        public readonly userId: number | undefined,
     ) {}
 }
 
@@ -20,7 +20,7 @@ export class GetAllCommentsForSpecificPostQuery implements IQueryHandler<GetAllC
         const comments = await this.commentsQueryRepository.getAllCommentsForSpecificPost(
             query.dto,
             Number(query.postId),
-            query.postId,
+            query.userId,
         );
         return await CommentsFactory.createCommentViewModelClassPagination(comments);
     }

@@ -3,7 +3,7 @@ import { UsersQueryRepository } from "../../query-repositories/users.query.repos
 import { UserModelClass } from "../../dtos/users.dto";
 
 export class GetUserByIdCommand {
-    constructor(public readonly userId: string) {}
+    constructor(public readonly userId: number) {}
 }
 
 @QueryHandler(GetUserByIdCommand)

@@ -59,7 +59,7 @@ export class PostsQueryRepository {
     async getAllPostsForSpecificBlog(
         dto: ModelForGettingAllPosts,
         blogId: number,
-        userId: string | undefined,
+        userId: number | undefined,
     ): Promise<PostClassPaginationDto> {
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;
@@ -112,7 +112,7 @@ export class PostsQueryRepository {
         };
     }
 
-    async getPostById(id: string, userId: string | undefined): Promise<PostsClass | null> {
+    async getPostById(id: string, userId: number | undefined): Promise<PostsClass | null> {
         let correctId;
         if (id) {
             correctId = Number(id);

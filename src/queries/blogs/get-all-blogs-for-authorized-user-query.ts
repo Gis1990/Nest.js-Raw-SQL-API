@@ -5,7 +5,7 @@ import { BlogViewModelClassPagination } from "../../entities/blogs.entity";
 import { BlogsFactory } from "../../factories/blogs.factory";
 
 export class GetAllBlogsForAuthorizedUserCommand {
-    constructor(public readonly dto: ModelForGettingAllBlogs, public readonly userId: string) {}
+    constructor(public readonly dto: ModelForGettingAllBlogs, public readonly userId: number) {}
 }
 
 @QueryHandler(GetAllBlogsForAuthorizedUserCommand)

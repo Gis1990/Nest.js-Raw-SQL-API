@@ -34,7 +34,7 @@ export class PostsController {
     async getAllCommentsForSpecificPost(
         @Param() params: PostsIdValidationModel,
         @Query() model: ModelForGettingAllComments,
-        @CurrentUserId() userId: string,
+        @CurrentUserId() userId: number | undefined,
     ): Promise<CommentViewModelPaginationClass> {
         return await this.queryBus.execute(new GetAllCommentsForSpecificPostCommand(model, params.postId, userId));
     }
@@ -53,7 +53,7 @@ export class PostsController {
     @Get(":postId")
     async getPost(
         @Param() params: PostsIdValidationModel,
-        @CurrentUserId() userId: string,
+        @CurrentUserId() userId: number | undefined,
     ): Promise<PostViewModelClass | null> {
         return await this.queryBus.execute(new GetPostByIdCommand(params.postId, userId));
     }

@@ -163,15 +163,11 @@ export class BlogsQueryRepository {
         return result[0] || null;
     }
 
-    async getBannedBlogsForUser(userId: string): Promise<BannedBlogsClass | null> {
-        let correctId;
-        if (userId) {
-            correctId = Number(userId);
-        }
-        if (!Number.isInteger(correctId)) {
+    async getBannedBlogsForUser(userId: number): Promise<BannedBlogsClass | null> {
+        if (!Number.isInteger(userId)) {
             return null;
         }
-        const result = await this.dataSource.query(`SELECT * FROM "bannedBlogs" WHERE "userId" = $1`, [correctId]);
+        const result = await this.dataSource.query(`SELECT * FROM "bannedBlogs" WHERE "userId" = $1`, [userId]);
         return result[0] || null;
     }
 }

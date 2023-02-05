@@ -5,7 +5,7 @@ import { ModelForGettingAllComments } from "../../dtos/comments.dto";
 import { CommentsFactory } from "../../factories/comments.factory";
 
 export class GetAllCommentsForAllPostsForBloggersBlogsCommand {
-    constructor(public readonly dto: ModelForGettingAllComments, public readonly userId: string | undefined) {}
+    constructor(public readonly dto: ModelForGettingAllComments, public readonly userId: number | undefined) {}
 }
 
 @QueryHandler(GetAllCommentsForAllPostsForBloggersBlogsCommand)

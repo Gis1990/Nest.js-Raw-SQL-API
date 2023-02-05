@@ -40,7 +40,7 @@ export class InputModelForNewPassword {
 export class CurrentUserModel {
     public email: string;
     public login: string;
-    public id: string;
+    public id: number;
 }
 
 export class CurrentUserModelForMeEndpoint {

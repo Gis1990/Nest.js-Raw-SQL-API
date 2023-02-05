@@ -15,7 +15,7 @@ import { GetUserByLoginOrEmailCommand } from "../../queries/users/get-user-by-lo
 export class IsUsersIdExistConstraint implements ValidatorConstraintInterface {
     constructor(private queryBus: QueryBus) {}
 
-    async validate(userId: string) {
+    async validate(userId: number) {
         const user = await this.queryBus.execute(new GetUserByIdCommand(userId));
         if (!user) {
             throw new HttpException("User not found", 404);

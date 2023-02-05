@@ -31,7 +31,7 @@ export class CommentsController {
     @UseGuards(JwtAccessTokenAuthGuard)
     @Delete(":id")
     @HttpCode(204)
-    async deleteBlog(@Param() params: CommentsIdValidationModel, @CurrentUserId() userId: string): Promise<boolean> {
+    async deleteBlog(@Param() params: CommentsIdValidationModel, @CurrentUserId() userId: number): Promise<boolean> {
         return await this.commandBus.execute(new DeleteCommentCommand(params.id, userId));
     }
 
@@ -39,7 +39,7 @@ export class CommentsController {
     @Get(":id")
     async getCommentById(
         @Param() params: CommentsIdValidationModel,
-        @CurrentUserId() userId: string,
+        @CurrentUserId() userId: number | undefined,
     ): Promise<CommentViewModelClass | null> {
         return await this.queryBus.execute(new GetCommentByIdCommand(params.id, userId));
     }

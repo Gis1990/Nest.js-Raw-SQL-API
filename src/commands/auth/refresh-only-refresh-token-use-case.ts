@@ -21,7 +21,7 @@ export class RefreshOnlyRefreshTokenUseCase implements ICommandHandler<RefreshOn
     async execute(command: RefreshOnlyRefreshTokenCommand): Promise<string> {
         const newLastActiveDate = new Date();
         await this.usersRepository.updateLastActiveDate(command.user.currentSession.deviceId, newLastActiveDate);
-        await this.securityService.terminateSpecificDevice(command.user.id, command.user.currentSession.deviceId);
+        await this.securityService.terminateSpecificDevice(command.user.currentSession.deviceId);
         return await this.jwtService.signAsync(
             {
                 id: command.user.id,

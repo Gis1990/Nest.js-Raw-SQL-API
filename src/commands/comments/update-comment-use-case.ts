@@ -7,7 +7,7 @@ export class UpdateCommentCommand {
     constructor(
         public readonly id: string,
         public readonly content: string,
-        public readonly userId: string | undefined,
+        public readonly userId: number | undefined,
     ) {}
 }
 
@@ -20,7 +20,7 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
         if (!comment) {
             return false;
         }
-        if (command.userId !== comment.commentatorInfo.userId) throw new HttpException("Incorrect id", 403);
+        if (command.userId.toString() !== comment.commentatorInfo.userId) throw new HttpException("Incorrect id", 403);
         return this.commentsRepository.updateCommentById(Number(command.id), command.content);
     }
 }

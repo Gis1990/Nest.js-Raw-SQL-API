@@ -4,7 +4,7 @@ import { CommentViewModelClass } from "../../entities/comments.entity";
 import { CommentsFactory } from "../../factories/comments.factory";
 
 export class GetCommentByIdCommand {
-    constructor(public readonly id: string, public readonly userId: string | undefined) {}
+    constructor(public readonly id: string, public readonly userId: number | undefined) {}
 }
 
 @QueryHandler(GetCommentByIdCommand)

@@ -5,7 +5,7 @@ import { PostsQueryRepository } from "../../query-repositories/posts.query.repos
 import { PostsFactory } from "../../factories/posts.factory";
 
 export class GetAllPostsForSpecificBlogCommand {
-    constructor(public dto: ModelForGettingAllPosts, public blogId: string, public userId: string | undefined) {}
+    constructor(public dto: ModelForGettingAllPosts, public blogId: string, public userId: number | undefined) {}
 }
 
 @QueryHandler(GetAllPostsForSpecificBlogCommand)

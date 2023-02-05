@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
 import { GetCommentByIdCommand } from "../../queries/comments/get-comment-by-id-query";
 
 export class DeleteCommentCommand {
-    constructor(public readonly id: string, public readonly userId: string | undefined) {}
+    constructor(public readonly id: string, public readonly userId: number | undefined) {}
 }
 
 @CommandHandler(DeleteCommentCommand)
@@ -16,7 +16,7 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
         if (!comment) {
             return false;
         }
-        if (command.userId !== comment.commentatorInfo.userId) throw new HttpException("Incorrect id", 403);
+        if (command.userId.toString() !== comment.commentatorInfo.userId) throw new HttpException("Incorrect id", 403);
         return this.commentsRepository.deleteCommentById(Number(command.id));
     }
 }

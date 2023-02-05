@@ -14,7 +14,7 @@ export class BindUserWithBlogUseCase implements ICommandHandler<BindUserWithBlog
 
     async execute(command: BindUserWithBlogCommand): Promise<boolean> {
         const blog = await this.queryBus.execute(new GetBlogByIdCommand(command.blogId));
-        const user = await this.queryBus.execute(new GetUserByIdCommand(command.userId));
+        const user = await this.queryBus.execute(new GetUserByIdCommand(Number(command.userId)));
         if (blog.blogOwnerInfo.userId) throw new HttpException("Blog already bound to any user", 400);
         return this.blogsRepository.bindUserWithBlog(Number(command.blogId), Number(command.userId), user.login);
     }

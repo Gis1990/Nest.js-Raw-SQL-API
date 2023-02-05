@@ -3,7 +3,7 @@ import { BlogsQueryRepository } from "../../query-repositories/blogs.query.repos
 import { BannedBlogsClass } from "../../schemas/users.schema";
 
 export class GetBannedBlogsForUserCommand {
-    constructor(public readonly userId: string) {}
+    constructor(public readonly userId: number) {}
 }
 
 @QueryHandler(GetBannedBlogsForUserCommand)

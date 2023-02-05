@@ -5,7 +5,7 @@ import { PostsFactory } from "../../factories/posts.factory";
 import { BlogsQueryRepository } from "../../query-repositories/blogs.query.repository";
 
 export class GetPostByIdCommand {
-    constructor(public readonly id: string, public readonly userId: string | undefined) {}
+    constructor(public readonly id: string, public readonly userId: number | undefined) {}
 }
 
 @QueryHandler(GetPostByIdCommand)

@@ -5,7 +5,7 @@ import { GetPostByIdForLikeOperationCommand } from "../../queries/posts/get-post
 export class LikeOperationForPostCommand {
     constructor(
         public readonly id: string,
-        public readonly userId: string,
+        public readonly userId: number,
         public readonly login: string,
         public readonly likeStatus: string,
     ) {}

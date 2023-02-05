@@ -8,8 +8,8 @@ export class BanUnbanUserByBloggerForBlogCommand {
         public readonly isBanned: boolean,
         public readonly banReason: string,
         public readonly blogId: string,
-        public readonly userId: string,
-        public readonly blogOwnerUserId: string,
+        public readonly userId: number,
+        public readonly blogOwnerUserId: number,
     ) {}
 }
 
@@ -19,12 +19,12 @@ export class BanUnbanUserByBloggerForBlogUseCase implements ICommandHandler<BanU
 
     async execute(command: BanUnbanUserByBloggerForBlogCommand): Promise<boolean> {
         const blog = await this.queryBus.execute(new GetBlogByIdForBanUnbanOperationCommand(command.blogId));
-        if (blog.blogOwnerUserId !== command.blogOwnerUserId) throw new HttpException("Access denied", 403);
+        if (blog.blogOwnerUserId !== command.blogOwnerUserId.toString()) throw new HttpException("Access denied", 403);
         return this.usersRepository.banUnbanUserByBloggerForBlog(
             command.isBanned,
             command.banReason,
             Number(command.blogId),
-            Number(command.userId),
+            command.userId,
         );
     }
 }

@@ -107,7 +107,7 @@ export class UsersRepository {
         return result[1] > 0;
     }
 
-    async terminateSpecificDevice(id: number, deviceId: string): Promise<boolean> {
+    async terminateSpecificDevice(deviceId: string): Promise<boolean> {
         const result = await this.dataSource.query(`DELETE FROM devices WHERE "deviceId" = $1 RETURNING id`, [
             deviceId,
         ]);
@@ -150,7 +150,7 @@ export class UsersRepository {
         return result[1] > 0;
     }
 
-    async banUnbanUserBySuperAdmin(banData: BanInfoClass, userId: string): Promise<boolean> {
+    async banUnbanUserBySuperAdmin(banData: BanInfoClass, userId: number): Promise<boolean> {
         await this.dataSource.query(`DELETE FROM devices WHERE "userId" = $1 RETURNING id`, [userId]);
         const result = await this.dataSource.query(
             `UPDATE users SET "isBanned" = $1, "banDate" = $2, "banReason" = $3 WHERE id = $4 RETURNING id`,

@@ -5,7 +5,7 @@ import { GetCommentByIdForLikeOperationCommand } from "../../queries/comments/ge
 export class LikeOperationForCommentCommand {
     constructor(
         public readonly id: string,
-        public readonly userId: string,
+        public readonly userId: number,
         public readonly login: string,
         public readonly likeStatus: string,
     ) {}

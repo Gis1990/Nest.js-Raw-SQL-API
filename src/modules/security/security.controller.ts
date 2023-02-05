@@ -47,10 +47,7 @@ export class SecurityController {
             new CheckAccessRightsCommand(userWithDeviceData, params.deviceId),
         );
         if (!correct) throw new HttpException("Access denied", 403);
-        const deviceTerminated = await this.securityService.terminateSpecificDevice(
-            userWithDeviceData.id,
-            params.deviceId,
-        );
+        const deviceTerminated = await this.securityService.terminateSpecificDevice(params.deviceId);
         if (deviceTerminated) {
             return true;
         }

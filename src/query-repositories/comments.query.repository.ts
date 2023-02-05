@@ -6,7 +6,7 @@ import { DataSource } from "typeorm";
 export class CommentsQueryRepository {
     constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-    async getCommentById(id: string, userId: string | undefined): Promise<CommentsClass | null> {
+    async getCommentById(id: string, userId: number | undefined): Promise<CommentsClass | null> {
         let correctId;
         if (id) {
             correctId = Number(id);
@@ -14,6 +14,7 @@ export class CommentsQueryRepository {
         if (!Number.isInteger(correctId)) {
             return null;
         }
+        const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const result = await this.dataSource.query(
             `SELECT comments.*, COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
         CASE
@@ -33,7 +34,7 @@ export class CommentsQueryRepository {
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",comments."commentOwnerUserLogin"`,
-            [userId, correctId],
+            [correctUserId, correctId],
         );
         return result[0] || null;
     }
@@ -41,7 +42,7 @@ export class CommentsQueryRepository {
     async getAllCommentsForSpecificPost(
         dto: ModelForGettingAllComments,
         postId: number,
-        userId: string | undefined,
+        userId: number | undefined,
     ): Promise<CommentClassPaginationDto> {
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;
@@ -92,7 +93,7 @@ export class CommentsQueryRepository {
 
     async getAllCommentsForAllPostsForBloggersBlogs(
         dto: ModelForGettingAllComments,
-        userId: string | undefined,
+        userId: number | undefined,
     ): Promise<CommentClassPaginationDto> {
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const { pageNumber = 1, pageSize = 10, sortBy = "createdAt", sortDirection = "desc" } = dto;

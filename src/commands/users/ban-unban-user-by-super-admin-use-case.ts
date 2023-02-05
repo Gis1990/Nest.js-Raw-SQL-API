@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { UsersRepository } from "../../repositories/users.repository";
 
 export class BanUnbanUserBySuperAdminCommand {
-    constructor(public readonly isBanned: boolean, public readonly banReason: string, public readonly userId: string) {}
+    constructor(public readonly isBanned: boolean, public readonly banReason: string, public readonly userId: number) {}
 }
 
 @CommandHandler(BanUnbanUserBySuperAdminCommand)

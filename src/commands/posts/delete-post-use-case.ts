@@ -5,7 +5,7 @@ import { GetBlogByIdCommand } from "../../queries/blogs/get-blog-by-id-query";
 import { BlogClass } from "../../schemas/blogs.schema";
 
 export class DeletePostCommand {
-    constructor(public blogId: string, public postId: string, public userId: string) {}
+    constructor(public blogId: string, public postId: string, public userId: number) {}
 }
 
 @CommandHandler(DeletePostCommand)
@@ -14,7 +14,7 @@ export class DeletePostUseCase implements ICommandHandler<DeletePostCommand> {
 
     async execute(command: DeletePostCommand): Promise<boolean> {
         const blog: BlogClass = await this.queryBus.execute(new GetBlogByIdCommand(command.blogId));
-        if (blog.blogOwnerUserId !== command.userId) throw new HttpException("Access denied", 403);
+        if (blog.blogOwnerUserId !== command.userId.toString()) throw new HttpException("Access denied", 403);
         return this.postsRepository.deletePostById(Number(command.postId));
     }
 }
