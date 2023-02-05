@@ -74,9 +74,9 @@ export class PostsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPostsForSpecificBlog: any = [correctUserId, blogId, pageSize, offset];
         const query = `SELECT posts.*,blogs.name as "blogName",         
-        COUNT(DISTINCT "usersWhoPutLikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedUsers" WHERE "userId" = "usersWhoPutLikeForPost"."userId" 
+        COUNT(DISTINCT "usersWhoPutLikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutLikeForPost"."userId" 
         AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "likesCount",
-        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedUsers" WHERE "userId" = "usersWhoPutDislikeForPost"."userId" 
+        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutDislikeForPost"."userId" 
         AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true)))  AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
