@@ -20,8 +20,8 @@ export class CommentsQueryRepository {
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const result = await this.dataSource.query(
             `SELECT comments.*, 
-        COUNT(DISTINCT "usersWhoPutLikeForComment"."commentId") AS "likesCount", 
-        COUNT(DISTINCT "usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
+        COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", 
+        COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
@@ -56,8 +56,8 @@ export class CommentsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, postId, pageSize, offset];
         const query = `SELECT comments.*,
-        COUNT(DISTINCT "usersWhoPutLikeForComment"."commentId") AS "likesCount", 
-        COUNT(DISTINCT "usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
+        COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", 
+        COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
@@ -110,8 +110,8 @@ export class CommentsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
         const query = `SELECT comments.*,posts.title,posts."blogId",blogs."name", 
-        COUNT(DISTINCT "usersWhoPutLikeForComment"."commentId") AS "likesCount", 
-        COUNT(DISTINCT "usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
+        COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", 
+        COUNT( "usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
