@@ -20,10 +20,20 @@ export class CommentsQueryRepository {
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const result = await this.dataSource.query(
             `SELECT comments.*, 
-        COUNT(DISTINCT "usersWhoPutLikeForComment"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutLikeForComment"."userId" 
-        AND "usersWhoPutLikeForComment"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true)))  AS "likesCount", 
-        COUNT(DISTINCT "usersWhoPutDislikeForComment"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutDislikeForComment"."userId" 
-        AND "usersWhoPutLikeForComment"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "dislikesCount",
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutLikeForComment"."id" 
+            ELSE NULL 
+          END
+        ) AS "likesCount" ,
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutDislikeForComment"."id" 
+            ELSE NULL 
+          END
+        ) AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
@@ -58,10 +68,20 @@ export class CommentsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, postId, pageSize, offset];
         const query = `SELECT comments.*,
-        COUNT(DISTINCT "usersWhoPutLikeForComment"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutLikeForComment"."userId" 
-        AND "usersWhoPutLikeForComment"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true)))  AS "likesCount", 
-        COUNT(DISTINCT "usersWhoPutDislikeForComment"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutDislikeForComment"."userId" 
-        AND "usersWhoPutLikeForComment"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "dislikesCount",
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutLikeForComment"."id" 
+            ELSE NULL 
+          END
+        ) AS "likesCount" ,
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutDislikeForComment"."id" 
+            ELSE NULL 
+          END
+        ) AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
@@ -114,10 +134,20 @@ export class CommentsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
         const query = `SELECT comments.*,posts.title,posts."blogId",blogs."name", 
-        COUNT(DISTINCT "usersWhoPutLikeForComment"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutLikeForComment"."userId" 
-        AND "usersWhoPutLikeForComment"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true)))  AS "likesCount", 
-        COUNT(DISTINCT "usersWhoPutDislikeForComment"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutDislikeForComment"."userId" 
-        AND "usersWhoPutLikeForComment"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "dislikesCount",
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutLikeForComment"."id" 
+            ELSE NULL 
+          END
+        ) AS "likesCount" ,
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutDislikeForComment"."id" 
+            ELSE NULL 
+          END
+        ) AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForComment" WHERE "commentId" = comments.id AND "userId" = $1) THEN 'Dislike'
@@ -133,8 +163,8 @@ export class CommentsQueryRepository {
         AND blogs."isBanned" = false
         AND blogs."blogOwnerUserId" = $1
         AND users.id NOT IN (
-        SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY comments.id,posts.title,posts."blogId",blogs."name"
+        GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",
+        comments."commentOwnerUserLogin",posts.title,posts."blogId",blogs."name"
         ORDER BY comments."${sortBy}"  ${sort} LIMIT $3 OFFSET $4`;
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
 

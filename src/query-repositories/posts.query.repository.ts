@@ -15,10 +15,20 @@ export class PostsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
         const query = `SELECT posts.*,blogs.name as "blogName",         
-        COUNT(DISTINCT "usersWhoPutLikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutLikeForPost"."userId" 
-        AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "likesCount",
-        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutDislikeForPost"."userId" 
-        AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "dislikesCount",
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutLikeForPost"."id" 
+            ELSE NULL 
+          END
+        ) AS "likesCount" ,
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutDislikeForPost"."id" 
+            ELSE NULL 
+          END
+        ) AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
@@ -74,10 +84,20 @@ export class PostsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPostsForSpecificBlog: any = [correctUserId, blogId, pageSize, offset];
         const query = `SELECT posts.*,blogs.name as "blogName",         
-        COUNT(DISTINCT "usersWhoPutLikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutLikeForPost"."userId" 
-        AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "likesCount",
-        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutDislikeForPost"."userId" 
-        AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true)))  AS "dislikesCount",
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutLikeForPost"."id" 
+            ELSE NULL 
+          END
+        ) AS "likesCount" ,
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutDislikeForPost"."id" 
+            ELSE NULL 
+          END
+        ) AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
@@ -139,10 +159,20 @@ export class PostsQueryRepository {
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const result = await this.dataSource.query(
             `SELECT posts.*,blogs.name as "blogName",  
-        COUNT(DISTINCT "usersWhoPutLikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutLikeForPost"."userId" 
-        AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "likesCount",
-        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedBlogs" WHERE "userId" = "usersWhoPutDislikeForPost"."userId" 
-        AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "dislikesCount",
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutLikeForPost"."id" 
+            ELSE NULL 
+          END
+        ) AS "likesCount" ,
+        COUNT(DISTINCT 
+          CASE 
+            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            THEN "usersWhoPutDislikeForPost"."id" 
+            ELSE NULL 
+          END
+        ) AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
