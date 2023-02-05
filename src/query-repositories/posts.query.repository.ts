@@ -16,7 +16,7 @@ export class PostsQueryRepository {
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
         const query = `SELECT posts.*,blogs.name as "blogName",         
         COUNT(DISTINCT "usersWhoPutLikeForPost"."id") AS "likesCount",
-        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") AS "dislikesCount",,
+        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
