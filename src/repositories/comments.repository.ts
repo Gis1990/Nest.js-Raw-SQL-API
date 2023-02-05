@@ -31,7 +31,7 @@ export class CommentsRepository {
     }
 
     async updateCommentById(id: number, content: string): Promise<boolean> {
-        const result = await this.dataSource.query(`UPDATE comments SET content = $1, WHERE id = $2  RETURNING id`, [
+        const result = await this.dataSource.query(`UPDATE comments SET content = $1 WHERE id = $2  RETURNING id`, [
             content,
             id,
         ]);
