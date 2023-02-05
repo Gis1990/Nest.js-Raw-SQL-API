@@ -22,14 +22,14 @@ export class CommentsQueryRepository {
             `SELECT comments.*, 
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForComment"."id" 
             ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForComment"."id" 
             ELSE NULL 
           END
@@ -68,16 +68,16 @@ export class CommentsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, postId, pageSize, offset];
         const query = `SELECT comments.*,
-        COUNT(DISTINCT 
+                COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForComment"."id" 
             ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForComment"."id" 
             ELSE NULL 
           END
@@ -134,16 +134,16 @@ export class CommentsQueryRepository {
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
         const query = `SELECT comments.*,posts.title,posts."blogId",blogs."name", 
-        COUNT(DISTINCT 
+                COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForComment"."id" 
             ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForComment"."id" 
             ELSE NULL 
           END

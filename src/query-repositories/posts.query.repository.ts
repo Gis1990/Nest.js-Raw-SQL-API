@@ -17,16 +17,14 @@ export class PostsQueryRepository {
         const query = `SELECT posts.*,blogs.name as "blogName",         
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForPost"."id" 
-            ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForPost"."id" 
-            ELSE NULL 
           END
         ) AS "dislikesCount",
         CASE
@@ -86,16 +84,14 @@ export class PostsQueryRepository {
         const query = `SELECT posts.*,blogs.name as "blogName",         
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForPost"."id" 
-            ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForPost"."id" 
-            ELSE NULL 
           END
         ) AS "dislikesCount",
         CASE
@@ -161,16 +157,14 @@ export class PostsQueryRepository {
             `SELECT posts.*,blogs.name as "blogName",  
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutLikeForPost"."id" 
-            ELSE NULL 
           END
         ) AS "likesCount" ,
         COUNT(DISTINCT 
           CASE 
-            WHEN users."isBanned" = true AND users.id IN (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
+            WHEN users."isBanned" = false AND users.id NOT (SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
             THEN "usersWhoPutDislikeForPost"."id" 
-            ELSE NULL 
           END
         ) AS "dislikesCount",
         CASE
