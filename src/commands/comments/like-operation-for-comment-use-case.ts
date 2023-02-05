@@ -57,14 +57,14 @@ export class LikeOperationForCommentUseCase implements ICommandHandler<LikeOpera
         // If the user wants to change his status to None and has already disliked the comment,
         // Remove the user from the list of users who disliked the comment,
         else if (command.likeStatus === "None" && isDisliked) {
-            update = `DELETE FROM "usersWhoPutDislikeForComment" WHERE "commentId" =$1 AND userId = $2 RETURNING id`;
+            update = `DELETE FROM "usersWhoPutDislikeForComment" WHERE "commentId" =$1 AND "userId" = $2 RETURNING id`;
             updateParams = [Number(command.id), Number(command.userId)];
             doubleOperation = false;
         }
         // If the user has already liked the comment and wants to dislike it,
         // Remove the user from the list of users who liked the comment, and add them to the list of users who disliked the comment
         else if (isLiked && command.likeStatus === "Dislike") {
-            update = `DELETE FROM "usersWhoPutLikeForComment" WHERE "commentId" =$1 AND userId = $2`;
+            update = `DELETE FROM "usersWhoPutLikeForComment" WHERE "commentId" =$1 AND "userId" = $2`;
             updateParams = [command.id, command.userId];
             update2 = `INSERT INTO "usersWhoPutDislikeForComment" (login, "userId", "addedAt","commentId")
         VALUES ($1, $2, $3,$4) RETURNING id`;
@@ -74,7 +74,7 @@ export class LikeOperationForCommentUseCase implements ICommandHandler<LikeOpera
         // If the user has already disliked the comment and wants to like it,
         // Remove the user from the list of users who disliked the comment, and add them to the list of users who liked the comment
         else if (isDisliked && command.likeStatus === "Like") {
-            update = `DELETE FROM "usersWhoPutDislikeForComment" WHERE "commentId" =$1 AND userId = $2 RETURNING id`;
+            update = `DELETE FROM "usersWhoPutDislikeForComment" WHERE "commentId" =$1 AND "userId" = $2 RETURNING id`;
             updateParams = [Number(command.id), Number(command.userId)];
             update = `INSERT INTO "usersWhoPutLikeForComment" (login, "userId", "addedAt","commentId")
         VALUES ($1, $2, $3,$4) RETURNING id`;

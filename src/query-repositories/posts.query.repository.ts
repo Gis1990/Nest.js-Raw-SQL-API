@@ -20,10 +20,13 @@ export class PostsQueryRepository {
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
         ELSE 'None'
         END AS "myStatus",
-        (SELECT array_agg("usersWhoPutLikeForPost" ORDER BY  "addedAt" DESC )
-         FROM "usersWhoPutLikeForPost"
-         WHERE "postId" = posts.id
-        ) AS "lastLikes"
+        (SELECT array_agg(likes) AS "lastLikes"
+        FROM (
+        SELECT "userId" || ' ' || login || ' ' || "addedAt" AS likes
+        FROM "usersWhoPutLikeForPost"
+        WHERE "postId" = posts.id
+        ORDER BY  "addedAt" DESC
+        LIMIT 3) subquery)
         FROM posts
         JOIN users ON posts."postOwnerUserId" = users.id
         JOIN blogs ON posts."blogId" = blogs.id
@@ -72,11 +75,13 @@ export class PostsQueryRepository {
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
         ELSE 'None'
         END AS "myStatus",
-        (
-        SELECT array_agg("usersWhoPutLikeForPost" ORDER BY  "addedAt" DESC )
+        (SELECT array_agg(likes) AS "lastLikes"
+        FROM (
+        SELECT "userId" || ' ' || login || ' ' || "addedAt" AS likes
         FROM "usersWhoPutLikeForPost"
         WHERE "postId" = posts.id
-        ) AS "lastLikes"
+        ORDER BY  "addedAt" DESC
+        LIMIT 3) subquery)
         FROM posts
         JOIN users ON posts."postOwnerUserId" = users.id
         JOIN blogs ON posts."blogId" = blogs.id
@@ -120,6 +125,10 @@ export class PostsQueryRepository {
         if (!Number.isInteger(correctId)) {
             return null;
         }
+        if (correctId >= 2147483647) {
+            return null;
+        }
+        const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const result = await this.dataSource.query(
             `SELECT posts.*,blogs.name as "blogName", COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
         CASE
@@ -127,11 +136,13 @@ export class PostsQueryRepository {
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
         ELSE 'None'
         END AS "myStatus",
-        (
-        SELECT array_agg("usersWhoPutLikeForPost" ORDER BY  "addedAt" DESC)
+        (SELECT array_agg(likes) AS "lastLikes"
+        FROM (
+        SELECT "userId" || ' ' || login || ' ' || "addedAt" AS likes
         FROM "usersWhoPutLikeForPost"
         WHERE "postId" = posts.id
-        ) AS "lastLikes"
+        ORDER BY  "addedAt" DESC
+        LIMIT 3) subquery)
         FROM posts
         JOIN users ON posts."postOwnerUserId" = users.id
         JOIN blogs ON posts."blogId" = blogs.id
@@ -143,7 +154,7 @@ export class PostsQueryRepository {
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY posts.id,blogs.name`,
-            [userId, correctId],
+            [correctUserId, correctId],
         );
         return result[0] || null;
     }

@@ -14,6 +14,9 @@ export class CommentsQueryRepository {
         if (!Number.isInteger(correctId)) {
             return null;
         }
+        if (correctId >= 2147483647) {
+            return null;
+        }
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const result = await this.dataSource.query(
             `SELECT comments.*, COUNT("usersWhoPutLikeForComment"."commentId") AS "likesCount", COUNT("usersWhoPutDislikeForComment"."commentId") AS "dislikesCount",
@@ -33,7 +36,8 @@ export class CommentsQueryRepository {
         AND comments.id = $2
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",comments."commentOwnerUserLogin"`,
+        GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",comments."commentOwnerUserLogin",
+        posts."createdAt"`,
             [correctUserId, correctId],
         );
         return result[0] || null;
@@ -66,7 +70,8 @@ export class CommentsQueryRepository {
         AND comments."postId" = $2
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",comments."commentOwnerUserLogin"
+        GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",comments."commentOwnerUserLogin",
+        posts."createdAt"
         ORDER BY posts."${sortBy}"  ${sort} LIMIT $3 OFFSET $4`;
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
 
