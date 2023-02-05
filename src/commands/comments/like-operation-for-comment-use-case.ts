@@ -20,8 +20,8 @@ export class LikeOperationForCommentUseCase implements ICommandHandler<LikeOpera
         if (!comment) {
             return false;
         }
-        const isLiked = comment.likesArray.map((user) => user.userId).includes(Number(command.userId));
-        const isDisliked = comment.dislikesArray.map((user) => user.userId).includes(Number(command.userId));
+        const isLiked = comment.likesArray.map((user) => user.userId).includes(command.userId);
+        const isDisliked = comment.dislikesArray.map((user) => user.userId).includes(command.userId);
         let updateParams;
         let updateParams2;
         let update;

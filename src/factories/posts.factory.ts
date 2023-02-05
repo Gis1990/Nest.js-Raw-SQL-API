@@ -8,7 +8,7 @@ export class PostsFactory {
         if (post.lastLikes) {
             correctLikes = post.lastLikes.map((elem: string) => {
                 const [userId, login, date, time] = elem.split(" ");
-                return { userId: Number(userId), login, addedAt: `${date} ${time}` };
+                return { userId: userId, login, addedAt: `${date} ${time}` };
             });
         }
         return new PostViewModelClass(
