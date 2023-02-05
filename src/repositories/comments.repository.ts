@@ -45,8 +45,6 @@ export class CommentsRepository {
         updateParams2: string[],
         doubleOperation: boolean,
     ): Promise<boolean> {
-        console.log(update, updateParams);
-        console.log(update2, updateParams2);
         let result;
         if (doubleOperation) {
             await this.dataSource.query(update, updateParams);

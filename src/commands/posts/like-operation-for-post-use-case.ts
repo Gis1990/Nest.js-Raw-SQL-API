@@ -47,6 +47,14 @@ export class LikeOperationForPostUseCase implements ICommandHandler<LikeOperatio
         else if (command.likeStatus === "None" && !isDisliked && !isLiked) {
             return true;
         }
+        // If the user wants to like the comment and has already liked it,
+        else if (command.likeStatus === "Like" && isLiked) {
+            return true;
+        }
+        // If the user wants to dislike the comment and has already disliked it,
+        else if (command.likeStatus === "Dislike" && isDisliked) {
+            return true;
+        }
         // If the user wants to change his status to None and has already liked the post,
         // Remove the user from the list of users who liked the post,
         else if (command.likeStatus === "None" && isLiked) {
