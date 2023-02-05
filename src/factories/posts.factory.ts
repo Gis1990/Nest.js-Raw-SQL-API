@@ -4,11 +4,13 @@ import { PostClassPaginationDto } from "../dtos/posts.dto";
 
 export class PostsFactory {
     static async createPostViewModelClass(post: PostsClass): Promise<PostViewModelClass> {
-        console.log("post.lastLikes", post.lastLikes);
-        const correctLikes: any[] = post.lastLikes.map((elem: string) => {
-            const [userId, login, date, time] = elem.split(" ");
-            return { userId: Number(userId), login, addedAt: `${date} ${time}` };
-        });
+        let correctLikes = [];
+        if (post.lastLikes) {
+            correctLikes = post.lastLikes.map((elem: string) => {
+                const [userId, login, date, time] = elem.split(" ");
+                return { userId: Number(userId), login, addedAt: `${date} ${time}` };
+            });
+        }
         return new PostViewModelClass(
             post.id.toString(),
             post.title,
