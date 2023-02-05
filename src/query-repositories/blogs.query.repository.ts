@@ -129,6 +129,9 @@ export class BlogsQueryRepository {
         if (!Number.isInteger(correctId)) {
             return null;
         }
+        if (correctId >= 2147483647) {
+            return null;
+        }
         const result = await this.dataSource.query(`SELECT * FROM blogs WHERE id = $1 AND "isBanned" = false`, [
             correctId,
         ]);
@@ -168,6 +171,6 @@ export class BlogsQueryRepository {
             return null;
         }
         const result = await this.dataSource.query(`SELECT * FROM "bannedBlogs" WHERE "userId" = $1`, [userId]);
-        return result[0] || null;
+        return result || null;
     }
 }

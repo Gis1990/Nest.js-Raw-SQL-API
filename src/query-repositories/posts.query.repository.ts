@@ -14,7 +14,9 @@ export class PostsQueryRepository {
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
-        const query = `SELECT posts.*,blogs.name as "blogName", COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
+        const query = `SELECT posts.*,blogs.name as "blogName",         
+        COUNT(DISTINCT "usersWhoPutLikeForPost"."id") AS "likesCount",
+        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") AS "dislikesCount",,
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
@@ -69,7 +71,9 @@ export class PostsQueryRepository {
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPostsForSpecificBlog: any = [correctUserId, blogId, pageSize, offset];
-        const query = `SELECT posts.*,blogs.name as "blogName", COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
+        const query = `SELECT posts.*,blogs.name as "blogName",         
+        COUNT(DISTINCT "usersWhoPutLikeForPost"."id") AS "likesCount",
+        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
@@ -130,7 +134,9 @@ export class PostsQueryRepository {
         }
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const result = await this.dataSource.query(
-            `SELECT posts.*,blogs.name as "blogName", COUNT("usersWhoPutLikeForPost"."postId") AS "likesCount", COUNT("usersWhoPutDislikeForPost"."postId") AS "dislikesCount",
+            `SELECT posts.*,blogs.name as "blogName",  
+        COUNT(DISTINCT "usersWhoPutLikeForPost"."id") AS "likesCount",
+        COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'

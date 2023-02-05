@@ -143,6 +143,9 @@ export class UsersQueryRepository {
         if (!Number.isInteger(correctId)) {
             return null;
         }
+        if (correctId >= 2147483647) {
+            return null;
+        }
         const user = await this.dataSource.query(`SELECT * FROM users WHERE id = $1 `, [correctId]);
         const devices = await this.dataSource.query(
             `SELECT ip,"lastActiveDate", "deviceId",title FROM devices WHERE "userId" = $1 `,
