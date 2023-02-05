@@ -77,7 +77,7 @@ export class PostsQueryRepository {
         COUNT(DISTINCT "usersWhoPutLikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedUsers" WHERE "userId" = "usersWhoPutLikeForPost"."userId" 
         AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS "likesCount",
         COUNT(DISTINCT "usersWhoPutDislikeForPost"."id") FILTER (WHERE NOT EXISTS (SELECT 1 FROM "bannedUsers" WHERE "userId" = "usersWhoPutDislikeForPost"."userId" 
-        AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true))) AS)) AS "dislikesCount",
+        AND "usersWhoPutLikeForPost"."userId" NOT IN (SELECT id FROM users WHERE "isBanned" = true)))  AS "dislikesCount",
         CASE
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutLikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Like'
         WHEN EXISTS (SELECT 1 FROM "usersWhoPutDislikeForPost" WHERE "postId" = posts.id AND "userId" = $1) THEN 'Dislike'
