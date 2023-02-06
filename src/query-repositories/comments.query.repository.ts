@@ -182,7 +182,8 @@ export class CommentsQueryRepository {
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
 
         const totalCount = await this.dataSource.query(
-            `SELECT COUNT(*) FROM posts WHERE JOIN users ON posts."postOwnerUserId" = users.id 
+            `SELECT COUNT(*) FROM posts 
+        JOIN users ON posts."postOwnerUserId" = users.id 
         JOIN blogs ON posts."blogId" = blogs.id 
         WHERE users."isBanned" = false 
         AND blogs."isBanned" = false 
