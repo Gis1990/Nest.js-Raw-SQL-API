@@ -22,7 +22,18 @@ export class PostsRepository {
             newPost.blogName,
         ];
         const result = await this.dataSource.query(query, values);
-        return result[0];
+        const post = await this.dataSource.query(
+            `SELECT p.*
+             FROM posts p
+             JOIN blogs b
+             ON p."blogId" = b.id
+             WHERE p.id = $1`,
+            [result[0].id],
+        );
+        post[0].myStatus = "None";
+        post[0].likesCount = 0;
+        post[0].dislikesCount = 0;
+        return post[0];
     }
 
     async updatePost(
