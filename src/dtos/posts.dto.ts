@@ -77,6 +77,7 @@ export class CreatedPostDto {
     public createdAt: Date;
     public blogId: number;
     public postOwnerUserId: number;
+    public blogName: string;
 }
 
 export class PostClassPaginationDto {

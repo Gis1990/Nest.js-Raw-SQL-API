@@ -14,7 +14,7 @@ export class PostsQueryRepository {
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
-        const query = `SELECT posts.*,blogs.name as "blogName",         
+        const query = `SELECT posts.*,        
         (
         SELECT COUNT(DISTINCT "usersWhoPutLikeForPost"."id")
         FROM "usersWhoPutLikeForPost"
@@ -58,7 +58,7 @@ export class PostsQueryRepository {
         AND blogs."isBanned" = false
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY posts.id,blogs.name
+        GROUP BY posts.id
         ORDER BY posts."${sortBy}"  ${sort} LIMIT $2 OFFSET $3`;
 
         const cursor = await this.dataSource.query(query, queryParamsForAllPosts);
@@ -91,7 +91,7 @@ export class PostsQueryRepository {
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPostsForSpecificBlog: any = [correctUserId, blogId, pageSize, offset];
-        const query = `SELECT posts.*,blogs.name as "blogName",         
+        const query = `SELECT posts.*,         
         (
         SELECT COUNT(DISTINCT "usersWhoPutLikeForPost"."id")
         FROM "usersWhoPutLikeForPost"
@@ -136,7 +136,7 @@ export class PostsQueryRepository {
         AND posts."blogId" = $2
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY posts.id,blogs.name
+        GROUP BY posts.id
         ORDER BY posts."${sortBy}"  ${sort} LIMIT $3 OFFSET $4`;
 
         const cursor = await this.dataSource.query(query, queryParamsForAllPostsForSpecificBlog);
@@ -174,7 +174,7 @@ export class PostsQueryRepository {
         }
         const correctUserId = Number.isInteger(Number(userId)) ? Number(userId) : 0;
         const result = await this.dataSource.query(
-            `SELECT posts.*,blogs.name as "blogName",  
+            `SELECT posts.*,
         (
         SELECT COUNT(DISTINCT "usersWhoPutLikeForPost"."id")
         FROM "usersWhoPutLikeForPost"
@@ -219,7 +219,7 @@ export class PostsQueryRepository {
         AND posts.id = $2
         AND users.id NOT IN (
         SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
-        GROUP BY posts.id,blogs.name`,
+        GROUP BY posts.id`,
             [correctUserId, correctId],
         );
         return result[0] || null;

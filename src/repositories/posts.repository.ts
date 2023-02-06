@@ -10,8 +10,8 @@ export class PostsRepository {
 
     async createPost(newPost: CreatedPostDto): Promise<PostsClass> {
         const query = `INSERT INTO posts (title, "shortDescription", content,
-        "createdAt", "blogId", "postOwnerUserId")
-        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`;
+        "createdAt", "blogId", "postOwnerUserId","blogName")
+        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`;
         const values = [
             newPost.title,
             newPost.shortDescription,
@@ -19,10 +19,11 @@ export class PostsRepository {
             newPost.createdAt,
             newPost.blogId,
             newPost.postOwnerUserId,
+            newPost.blogName,
         ];
         const result = await this.dataSource.query(query, values);
         const post = await this.dataSource.query(
-            `SELECT p.*, b.name AS "blogName"
+            `SELECT p.*,
              FROM posts p
              JOIN blogs b
              ON p."blogId" = b.id

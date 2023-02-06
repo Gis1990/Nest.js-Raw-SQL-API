@@ -31,7 +31,7 @@ export class BlogsQueryRepository {
         } else {
             whereClause += `ORDER BY "${sortBy}"  ${sort} LIMIT $1 OFFSET $2`;
         }
-        const query = `SELECT id,name,description,"websiteUrl", "createdAt" FROM blogs WHERE "isBanned" = false ${whereClause}`;
+        const query = `SELECT id,name,description,"websiteUrl", "createdAt","isMembership" FROM blogs WHERE "isBanned" = false ${whereClause}`;
         const cursor = await this.dataSource.query(query, queryParamsForAllBlogs);
 
         const totalCount = await this.dataSource.query(
