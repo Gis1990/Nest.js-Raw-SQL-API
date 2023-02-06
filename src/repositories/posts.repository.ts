@@ -11,7 +11,7 @@ export class PostsRepository {
     async createPost(newPost: CreatedPostDto): Promise<PostsClass> {
         const query = `INSERT INTO posts (title, "shortDescription", content,
         "createdAt", "blogId", "postOwnerUserId","blogName")
-        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`;
+        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
         const values = [
             newPost.title,
             newPost.shortDescription,
@@ -22,18 +22,7 @@ export class PostsRepository {
             newPost.blogName,
         ];
         const result = await this.dataSource.query(query, values);
-        const post = await this.dataSource.query(
-            `SELECT p.*,
-             FROM posts p
-             JOIN blogs b
-             ON p."blogId" = b.id
-             WHERE p.id = $1`,
-            [result[0].id],
-        );
-        post[0].myStatus = "None";
-        post[0].likesCount = 0;
-        post[0].dislikesCount = 0;
-        return post[0];
+        return result[0];
     }
 
     async updatePost(
