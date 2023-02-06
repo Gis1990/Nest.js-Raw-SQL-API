@@ -175,6 +175,7 @@ export class CommentsQueryRepository {
         AND blogs."isBanned" = false
         AND blogs."blogOwnerUserId" = $1
         AND users.id NOT IN (
+        SELECT "userId" FROM "bannedBlogs" WHERE "userId" = users.id)
         GROUP BY comments.id,comments.content,comments."createdAt",comments."commentOwnerUserId",comments."postId",
         comments."commentOwnerUserLogin",posts.title,posts."blogId",blogs."name"
         ORDER BY comments."${sortBy}"  ${sort} LIMIT $3 OFFSET $4`;
