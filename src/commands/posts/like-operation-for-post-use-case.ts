@@ -85,12 +85,11 @@ export class LikeOperationForPostUseCase implements ICommandHandler<LikeOperatio
         else if (isDisliked && command.likeStatus === "Like") {
             update = `DELETE FROM "usersWhoPutDislikeForPost" WHERE "postId" =$1 AND "userId" = $2 RETURNING id`;
             updateParams = [command.id, command.userId];
-            update = `INSERT INTO "usersWhoPutLikeForPost" (login, "userId", "addedAt","postId")
+            update2 = `INSERT INTO "usersWhoPutLikeForPost" (login, "userId", "addedAt","postId")
         VALUES ($1, $2, $3,$4) RETURNING id`;
-            updateParams = [command.login, command.userId, new Date(), Number(command.id)];
+            updateParams2 = [command.login, command.userId, new Date(), Number(command.id)];
             doubleOperation = true;
         }
-
         return this.postsRepository.likeOperation(update, updateParams, update2, updateParams2, doubleOperation);
     }
 }

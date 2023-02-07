@@ -194,6 +194,7 @@ describe("blogger endpoint blogs  /blogger/blogs (e2e)", () => {
                 name: correctBlog1.name,
                 websiteUrl: correctBlog1.websiteUrl,
                 createdAt: expect.any(String),
+                isMembership: false,
             });
             blogId2 = response.body.id;
         });

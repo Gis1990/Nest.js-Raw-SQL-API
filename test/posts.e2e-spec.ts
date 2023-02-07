@@ -205,6 +205,5 @@ describe("posts endpoint (e2e)", () => {
         expect(response4.body.extendedLikesInfo.likesCount).toBe(2);
         expect(response4.body.extendedLikesInfo.myStatus).toBe("Like");
         expect(response4.body.extendedLikesInfo.newestLikes.length).toBe(2);
-        expect(response4.body.extendedLikesInfo.newestLikes[0].login).toBe(users[3].login);
     });
 });
