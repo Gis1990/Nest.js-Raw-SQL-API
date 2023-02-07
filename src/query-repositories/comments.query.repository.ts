@@ -141,7 +141,7 @@ export class CommentsQueryRepository {
         const sort = sortDirection === "desc" ? `DESC` : `ASC`;
         const offset = pageSize * (pageNumber - 1);
         const queryParamsForAllPosts: any = [correctUserId, pageSize, offset];
-        const query = `SELECT comments.*,posts.title,posts."blogId",blogs."name", 
+        const query = `SELECT comments.*,posts.title,posts."blogId",blogs."name" as "blogName", 
         (
         SELECT COUNT(DISTINCT "usersWhoPutLikeForComment"."id")
         FROM "usersWhoPutLikeForComment"
