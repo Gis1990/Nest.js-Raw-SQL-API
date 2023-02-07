@@ -42,6 +42,11 @@ export class CommentsFactory {
                 blogId: comment.blogId.toString(),
                 blogName: comment.blogName,
             },
+            {
+                likesCount: Number(comment.likesCount),
+                dislikesCount: Number(comment.dislikesCount),
+                myStatus: comment.myStatus,
+            },
         );
     }
 

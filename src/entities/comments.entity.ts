@@ -48,5 +48,6 @@ export class CommentViewModelForBloggerClass {
             blogId: string;
             blogName: string;
         },
+        public likesInfo: LikesInfoClass,
     ) {}
 }
