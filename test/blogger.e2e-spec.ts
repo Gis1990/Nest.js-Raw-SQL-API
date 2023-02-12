@@ -200,7 +200,7 @@ describe("blogger endpoint blogs  /blogger/blogs (e2e)", () => {
         });
         it("should return status 404 for non existing id ", async () => {
             await request(app.getHttpServer())
-                .delete(`/blogger/blogs/5`)
+                .delete(`/blogger/blogs/1233`)
                 .set("authorization", "Bearer " + accessTokenForUser1)
                 .expect(404);
         });
